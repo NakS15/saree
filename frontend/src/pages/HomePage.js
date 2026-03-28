@@ -2,7 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination, Navigation, EffectFade } from 'swiper/modules';
-import 'swiper/css'; 'swiper/css/pagination'; 'swiper/css/navigation'; 'swiper/css/effect-fade';
+import 'swiper/css';
+import 'swiper/css/pagination';
+import 'swiper/css/navigation';
+import 'swiper/css/effect-fade';
 import { motion } from 'framer-motion';
 import { ArrowRightIcon } from '@heroicons/react/24/outline';
 import ProductCard from '../components/product/ProductCard';
@@ -10,9 +13,9 @@ import { ProductCardSkeleton } from '../components/ui/Skeletons';
 import { productService, categoryService } from '../services';
 
 const HERO_SLIDES = [
-  { title: 'Discover Timeless Elegance', subtitle: 'Authentic Banarasi & Kanjivaram Sarees', cta: 'Shop Bridal Collection', link: '/category/bridal-sarees', bg: 'from-primary-900 via-primary-700 to-gold-700', emoji: '🥻' },
-  { title: 'Handloom Heritage', subtitle: 'Direct from India\'s Master Weavers', cta: 'Explore Handloom', link: '/category/handloom-sarees', bg: 'from-gold-800 via-primary-700 to-primary-900', emoji: '🪡' },
-  { title: 'Summer Cotton Collection', subtitle: 'Lightweight & Breathable Everyday Sarees', cta: 'Shop Cotton Sarees', link: '/category/cotton-sarees', bg: 'from-teal-800 via-primary-700 to-primary-800', emoji: '🌸' },
+  { title: 'Discover Timeless Elegance', subtitle: 'Authentic Banarasi & Kanjivaram Sarees', cta: 'Shop Bridal Collection', link: '/category/bridal-sarees', bg: 'from-primary-900 via-primary-700 to-amber-800', emoji: '🥻' },
+  { title: 'Handloom Heritage', subtitle: 'Direct from India\'s Master Weavers', cta: 'Explore Handloom', link: '/category/handloom-sarees', bg: 'from-amber-800 via-amber-700 to-teal-800', emoji: '🪡' },
+  { title: 'Summer Cotton Collection', subtitle: 'Lightweight & Breathable Everyday Sarees', cta: 'Shop Cotton Sarees', link: '/category/cotton-sarees', bg: 'from-teal-800 via-primary-700 to-primary-900', emoji: '🌸' },
 ];
 
 const CATEGORY_CARDS = [
@@ -43,7 +46,9 @@ export default function HomePage() {
     <div className="min-h-screen">
       {/* Hero Slider */}
       <section className="relative">
-        <Swiper modules={[Autoplay, Pagination, Navigation, EffectFade]} effect="fade" autoplay={{ delay: 5000, disableOnInteraction: false }}
+        <Swiper modules={[Autoplay, Pagination, Navigation, EffectFade]} effect="fade"
+          fadeEffect={{ crossFade: true }}
+          autoplay={{ delay: 5000, disableOnInteraction: false }}
           pagination={{ clickable: true }} navigation loop className="h-[60vh] md:h-[75vh]">
           {HERO_SLIDES.map((slide, i) => (
             <SwiperSlide key={i}>

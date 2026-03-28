@@ -13,6 +13,7 @@ const uiSlice = createSlice({
     toggleCartDrawer:  (state) => { state.cartDrawerOpen = !state.cartDrawerOpen; },
     openSearchOverlay: (state) => { state.searchOverlayOpen = true; },
     closeSearchOverlay:(state) => { state.searchOverlayOpen = false; },
+    toggleSearchOverlay:(state) => { state.searchOverlayOpen = !state.searchOverlayOpen; },
     toggleMobileMenu:  (state) => { state.mobileMenuOpen = !state.mobileMenuOpen; },
     closeMobileMenu:   (state) => { state.mobileMenuOpen = false; },
   },
@@ -20,7 +21,7 @@ const uiSlice = createSlice({
 
 export const {
   openCartDrawer, closeCartDrawer, toggleCartDrawer,
-  openSearchOverlay, closeSearchOverlay,
+  openSearchOverlay, closeSearchOverlay, toggleSearchOverlay,
   toggleMobileMenu, closeMobileMenu,
 } = uiSlice.actions;
 

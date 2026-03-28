@@ -5,7 +5,7 @@ import Navbar from './Navbar';
 import Footer from './Footer';
 import CartDrawer from '../cart/CartDrawer';
 import SearchOverlay from '../search/SearchOverlay';
-import { getMe } from '../../features/auth/authSlice';
+import { fetchMe } from '../../features/auth/authSlice';
 import { fetchCart } from '../../features/cart/cartSlice';
 import { fetchWishlist } from '../../features/wishlist/wishlistSlice';
 
@@ -18,7 +18,7 @@ export default function Layout() {
 
   useEffect(() => {
     if (localStorage.getItem('accessToken')) {
-      dispatch(getMe());
+      dispatch(fetchMe());
       dispatch(fetchCart());
       dispatch(fetchWishlist());
     }

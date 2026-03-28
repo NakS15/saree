@@ -1,6 +1,4 @@
 import axios from 'axios';
-import { store } from '../store';
-import { setAccessToken, clearAuth } from '../features/auth/authSlice';
 
 const api = axios.create({
   baseURL:         process.env.REACT_APP_API_URL || '/api/v1',
@@ -10,7 +8,7 @@ const api = axios.create({
 
 // ─── Request interceptor — attach access token ────────────────────────────────
 api.interceptors.request.use((config) => {
-  const token = store.getState().auth.accessToken || localStorage.getItem('accessToken');
+  const token = localStorage.getItem('accessToken');
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
@@ -45,13 +43,13 @@ api.interceptors.response.use(
           {},
           { withCredentials: true }
         );
-        store.dispatch(setAccessToken(data.accessToken));
+        localStorage.setItem('accessToken', data.accessToken);
         processQueue(null, data.accessToken);
         original.headers.Authorization = `Bearer ${data.accessToken}`;
         return api(original);
       } catch (refreshErr) {
         processQueue(refreshErr, null);
-        store.dispatch(clearAuth());
+        localStorage.removeItem('accessToken');
         return Promise.reject(refreshErr);
       } finally {
         isRefreshing = false;

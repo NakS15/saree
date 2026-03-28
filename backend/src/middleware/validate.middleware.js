@@ -50,3 +50,5 @@ exports.validateAddress = [
   body('state').trim().notEmpty().withMessage('State required'),
   validate,
 ];
+
+exports.validate = validate;

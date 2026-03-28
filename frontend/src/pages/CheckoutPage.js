@@ -267,7 +267,7 @@ export default function CheckoutPage() {
             <h3 className="font-serif text-lg font-bold text-gray-900">Order Summary</h3>
             <div className="space-y-2 text-gray-600">
               <div className="flex justify-between"><span>Subtotal</span><span>{formatPrice(subtotal)}</span></div>
-              <div className="flex justify-between"><span>Shipping</span><span className={shippingCharge===0?'text-green-600':''}}>{shippingCharge===0?'FREE':formatPrice(shippingCharge)}</span></div>
+              <div className="flex justify-between"><span>Shipping</span><span className={shippingCharge === 0 ? 'text-green-600' : ''}>{shippingCharge === 0 ? 'FREE' : formatPrice(shippingCharge)}</span></div>
               <div className="flex justify-between"><span>Tax (GST 5%)</span><span>{formatPrice(tax)}</span></div>
               {couponDiscount > 0 && <div className="flex justify-between text-green-600"><span>Coupon</span><span>-{formatPrice(couponDiscount)}</span></div>}
             </div>

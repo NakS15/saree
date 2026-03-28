@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { MagnifyingGlassIcon, XMarkIcon, ClockIcon } from '@heroicons/react/24/outline';
 import { motion, AnimatePresence } from 'framer-motion';
-import { closeSearch } from '../../features/ui/uiSlice';
+import { closeSearchOverlay } from '../../features/ui/uiSlice';
 import { productService } from '../../services';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { formatPrice } from '../../utils/helpers';
@@ -41,12 +41,12 @@ export default function SearchOverlay() {
     const searches = [q, ...recent.filter((r) => r !== q)].slice(0, 6);
     localStorage.setItem('recentSearches', JSON.stringify(searches));
     setRecent(searches);
-    dispatch(closeSearch());
+    dispatch(closeSearchOverlay());
     navigate(`/products?q=${encodeURIComponent(q.trim())}`);
     setQuery('');
   };
 
-  const handleClose = () => { dispatch(closeSearch()); setQuery(''); };
+  const handleClose = () => { dispatch(closeSearchOverlay()); setQuery(''); };
 
   return (
     <AnimatePresence>
@@ -93,7 +93,7 @@ export default function SearchOverlay() {
                       <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Categories</p>
                       <div className="flex flex-wrap gap-2">
                         {results.categories.map((cat) => (
-                          <button key={cat._id} onClick={() => { dispatch(closeSearch()); navigate(`/category/${cat.slug}`); }}
+                          <button key={cat._id} onClick={() => { dispatch(closeSearchOverlay()); navigate(`/category/${cat.slug}`); }}
                             className="px-3 py-1.5 bg-primary-50 text-primary-700 rounded-full text-sm hover:bg-primary-100 transition-colors">
                             {cat.name}
                           </button>
@@ -106,7 +106,7 @@ export default function SearchOverlay() {
                       <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Products</p>
                       <div className="space-y-2">
                         {results.products.map((product) => (
-                          <button key={product._id} onClick={() => { dispatch(closeSearch()); navigate(`/products/${product.slug}`); }}
+                          <button key={product._id} onClick={() => { dispatch(closeSearchOverlay()); navigate(`/products/${product.slug}`); }}
                             className="flex items-center gap-4 w-full p-3 rounded-xl hover:bg-gray-50 text-left transition-colors">
                             <LazyLoadImage src={product.images?.[0]?.url} alt={product.name}
                               className="w-14 h-14 object-cover rounded-lg bg-gray-100" />

@@ -19,4 +19,10 @@ router.post('/kyc-document', protect, uploadDoc.single('document'), (req, res) =
   res.status(200).json({ success: true, data: { url: req.file.path, publicId: req.file.filename } });
 });
 
+// ─── POST /upload/test ────────────────────────────────────────────────────────
+router.post('/test', upload.single('image'), (req, res) => {
+  console.log('Upload test route hit', req.file);
+  res.status(200).json({ success: true, data: { url: req.file.path, publicId: req.file.filename } });
+});
+
 module.exports = router;

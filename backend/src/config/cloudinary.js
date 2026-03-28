@@ -7,12 +7,15 @@ const cloudinaryConfigured =
   process.env.CLOUDINARY_CLOUD_NAME &&
   process.env.CLOUDINARY_CLOUD_NAME !== 'REPLACE_WITH_YOUR_CLOUD_NAME';
 
+console.log('Cloudinary configured:', cloudinaryConfigured, process.env.CLOUDINARY_CLOUD_NAME);
+
 if (cloudinaryConfigured) {
   cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
     api_secret: process.env.CLOUDINARY_API_SECRET,
   });
+  console.log('Cloudinary config set');
 }
 
 // ─── Fallback: local disk storage when Cloudinary not configured ───────────────

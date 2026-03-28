@@ -4,7 +4,7 @@ const passport = require('passport');
 const ctrl     = require('../controllers/auth.controller');
 const { protect } = require('../middleware/auth.middleware');
 const { body }    = require('express-validator');
-const validate    = require('../middleware/validate.middleware');
+const { validate } = require('../middleware/validate.middleware');
 
 const loginRules = [
   body('email').isEmail().normalizeEmail(),
