@@ -13,6 +13,7 @@ const xssClean       = require('xss-clean');
 const hpp            = require('hpp');
 const passport       = require('passport');
 const session        = require('express-session');
+const MemoryStore    = require('memorystore')(session);
 const logger         = require('./config/logger');
 const errorHandler   = require('./middleware/errorHandler');
 
@@ -91,6 +92,7 @@ app.use(session({
   secret:            process.env.SESSION_SECRET || 'sareebazaar-session',
   resave:            false,
   saveUninitialized: false,
+  store:             new MemoryStore({ checkPeriod: 86400000 }),
   cookie:            { secure: process.env.NODE_ENV === 'production', maxAge: 24 * 60 * 60 * 1000 },
 }));
 app.use(passport.initialize());
