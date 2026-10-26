@@ -1,149 +1,207 @@
-# 🪡 SareeBazaar — Full-Stack E-Commerce Platform
+# 🪡 SareeBazaar — Full-Stack Multi-Vendor E-Commerce Platform
+
+<div align="center">
+
+[![React](https://img.shields.io/badge/React-18-black?style=for-the-badge&logo=react&logoColor=61DAFB)](https://react.dev/)
+[![Node.js](https://img.shields.io/badge/Node.js-Express-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Mongoose-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v3-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![Razorpay](https://img.shields.io/badge/Payments-Razorpay-0C2451?style=for-the-badge&logo=razorpay&logoColor=white)](https://razorpay.com/)
+
+<p align="center">
+  <strong>A full-stack, multi-vendor marketplace for sarees: buyers browse, compare, and purchase; sellers manage their own storefronts — with real payments, auth, and order management.</strong>
+</p>
+
+<p align="center">
+  Built by <strong><a href="https://github.com/NakS15">Nakul Bukkawar</a></strong>.
+</p>
+
+</div>
 
 ---
 
-## ✅ Service Setup Checklist (Phases 2–4)
+## ✦ Overview
 
-### Phase 2 — Cloudinary (Image Uploads)
-1. Go to **[cloudinary.com](https://cloudinary.com)** → Sign up free
-2. After login → **Dashboard** → you'll see `Cloud Name`, `API Key`, `API Secret`
-3. Copy all 3 into `backend/.env`:
-```
-CLOUDINARY_CLOUD_NAME=dxyz12abc
-CLOUDINARY_API_KEY=123456789012345
-CLOUDINARY_API_SECRET=abcDEFghiJKLmnoPQR
-```
-
-### Phase 3 — Gmail (Order Emails, Password Reset)
-1. Go to **[myaccount.google.com/security](https://myaccount.google.com/security)**
-2. Make sure **2-Step Verification** is ON
-3. Go to **[myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords)**
-4. Select app: **Mail** → Generate → copy the 16-character password
-5. Add to `backend/.env` (remove spaces from the password):
-```
-SMTP_EMAIL=youremail@gmail.com
-SMTP_PASSWORD=abcdabcdabcdabcd
-FROM_EMAIL=youremail@gmail.com
-FROM_NAME=SareeBazaar
-```
-
-### Phase 4 — Razorpay (Online Payments)
-1. Go to **[razorpay.com](https://razorpay.com)** → Sign up
-2. Dashboard → **Settings** → **API Keys** → **Generate Test Key**
-3. Add to `backend/.env`:
-```
-RAZORPAY_KEY_ID=rzp_test_xxxxxxxxxxxx
-RAZORPAY_KEY_SECRET=xxxxxxxxxxxxxxxxxxxx
-RAZORPAY_WEBHOOK_SECRET=any_random_string_you_choose
-```
-4. Create `frontend/.env.local` and add:
-```
-REACT_APP_API_URL=http://localhost:5000/api/v1
-REACT_APP_RAZORPAY_KEY_ID=rzp_test_xxxxxxxxxxxx
-```
-> 💡 Use Razorpay test card: `4111 1111 1111 1111`, CVV: any 3 digits, Expiry: any future date
+**SareeBazaar** is a side project modeled on a real multi-vendor marketplace:
+sellers (vendors) list products in their own storefront, buyers browse,
+search, and filter across categories, and checkout flows through a real
+payment gateway with email/SMS order confirmations. It's a monorepo with a
+separate Express/MongoDB API and a React single-page frontend.
 
 ---
 
-## 🚀 Push to GitHub
+## ✦ Key Features
+
+### 1. 🔐 Authentication & Accounts
+- JWT access + refresh token auth, with Google OAuth (Passport) as an
+  alternative sign-in.
+- Role-based access: **customer**, **vendor**, and **admin**, each with their
+  own dashboards and permissions.
+
+### 2. 🏬 Multi-Vendor Marketplace
+- Vendors get their own storefront page, manage their own product catalog,
+  and fulfil their own orders.
+- Admins oversee vendors, products, and platform-wide order activity.
+
+### 3. 🛍️ Shopping Experience
+- Product catalog with categories, search, cart, and wishlist.
+- Product image zoom (`react-image-magnify`) and carousels (`Swiper`) on
+  product detail pages.
+- Coupons and discount codes applied at checkout.
+
+### 4. 💳 Real Payments & Orders
+- Checkout integrated with **Razorpay**, including webhook-based payment
+  confirmation (`payment.captured` / `payment.failed`).
+- Order history, order detail tracking, and shipping handling.
+
+### 5. ⭐ Reviews & Notifications
+- Product reviews and ratings.
+- Transactional email (Nodemailer) and SMS (Twilio) for order and account
+  events.
+
+### 6. 🌍 Internationalization
+- Multi-language UI via `i18next` / `react-i18next` with automatic browser
+  language detection.
+
+### 7. 🛡️ Production-Minded Backend Hardening
+- `helmet`, `express-rate-limit`, `express-mongo-sanitize`, `xss-clean`, and
+  `hpp` guard the API against common web vulnerabilities.
+- Structured logging via `winston`, async error handling via
+  `express-async-errors`.
+
+---
+
+## ✦ Tech Stack
+
+| Domain | Technology | Description |
+|---|---|---|
+| **Frontend** | React 18, Redux Toolkit, React Router | SPA with centralized state and client-side routing |
+| **Styling** | Tailwind CSS 3 | Utility-first styling with forms/typography/aspect-ratio plugins |
+| **Forms & Validation** | React Hook Form + Zod | Type-safe form validation |
+| **Motion** | Framer Motion | UI transitions and micro-interactions |
+| **Backend** | Node.js, Express | REST API (`/api/v1`) |
+| **Database** | MongoDB + Mongoose | Document models for users, vendors, products, orders, etc. |
+| **Auth** | JWT + Passport (Google OAuth) | Access/refresh tokens, social login |
+| **Payments** | Razorpay | Checkout + webhook-based payment confirmation |
+| **Media** | Cloudinary + Multer | Product image uploads and storage |
+| **Notifications** | Nodemailer + Twilio | Transactional email and SMS |
+| **i18n** | i18next / react-i18next | Multi-language frontend |
+
+---
+
+## ✦ Project Structure
 
 ```bash
-cd /Users/bti-000793/Downloads/saree
-
-# Initialise git (only needed once)
-git init
-git add .
-git commit -m "Initial commit — SareeBazaar full-stack app"
-
-# Create a repo on github.com then:
-git remote add origin https://github.com/YOUR_USERNAME/sareebazaar.git
-git branch -M main
-git push -u origin main
-```
-> ⚠️ The `.gitignore` is already set up — `.env` files will **never** be committed.
-
----
-
-## 🌐 Deploy to the Internet (Free)
-
-### Step 1 — MongoDB Atlas (Free Database)
-1. Go to **[cloud.mongodb.com](https://cloud.mongodb.com)** → Sign up
-2. Create a **free M0 cluster** (choose any region)
-3. **Database Access** → Add user → username + password (save these)
-4. **Network Access** → Add IP → `0.0.0.0/0` (allow all — needed for Render)
-5. **Connect** → **Drivers** → copy the connection string, replace `<password>`:
-```
-mongodb+srv://youruser:yourpassword@cluster0.xxxxx.mongodb.net/sareebazaar
+saree/
+├── backend/
+│   ├── src/
+│   │   ├── routes/          # auth, product, cart, order, payment, vendor, admin, ...
+│   │   ├── controllers/     # Request handlers per domain
+│   │   ├── models/          # Mongoose schemas (User, Product, Order, Vendor, ...)
+│   │   ├── middleware/      # Auth guard, validation, error handling
+│   │   └── config/          # DB, Cloudinary, Passport, logger, seeder
+│   └── package.json
+├── frontend/
+│   ├── src/
+│   │   ├── pages/           # Route-level pages (admin/, vendor/, auth/, ...)
+│   │   ├── features/        # Redux slices (auth, cart, products, wishlist, ui)
+│   │   ├── i18n/            # Language configuration
+│   │   └── components/
+│   └── package.json
+└── package.json
 ```
 
 ---
 
-### Step 2 — Deploy Backend to Render (Free)
-1. Go to **[render.com](https://render.com)** → Sign up with GitHub
-2. **New** → **Web Service** → select your `sareebazaar` repo
-3. Set these settings:
-   | Field | Value |
-   |---|---|
-   | Root Directory | `backend` |
-   | Runtime | `Node` |
-   | Build Command | `npm install` |
-   | Start Command | `npm start` |
-4. Click **Environment** → **Add from .env** → paste ALL your backend `.env` values BUT change:
-   ```
-   NODE_ENV=production
-   MONGO_URI=mongodb+srv://...   ← your Atlas URI
-   CLIENT_URL=https://your-app.vercel.app  ← fill after step 3
-   ```
-5. Click **Create Web Service** — wait ~3 mins
-6. Copy your URL: `https://sareebazaar-api.onrender.com`
+## ✦ Getting Started Locally
 
-> 💡 **Seed the database on Render:** After deploy, go to Render → your service → **Shell** tab → run `npm run seed`
+### Prerequisites
+- Node.js 18+
+- A MongoDB instance (local or [MongoDB Atlas](https://cloud.mongodb.com) free tier)
 
----
+```bash
+# Clone the repository
+git clone https://github.com/NakS15/saree.git
+cd saree
 
-### Step 3 — Deploy Frontend to Vercel (Free)
-1. Go to **[vercel.com](https://vercel.com)** → Sign up with GitHub
-2. **Add New Project** → import your `sareebazaar` repo
-3. Set:
-   | Field | Value |
-   |---|---|
-   | Root Directory | `frontend` |
-   | Build Command | `npm run build` |
-   | Output Directory | `build` |
-4. **Environment Variables** → add:
-   ```
-   REACT_APP_API_URL=https://sareebazaar-api.onrender.com/api/v1
-   REACT_APP_RAZORPAY_KEY_ID=rzp_test_xxxxxxxxxxxx
-   ```
-5. Click **Deploy** — wait ~2 mins
-6. Your site is live at `https://sareebazaar.vercel.app` 🎉
+# Backend
+cd backend
+npm install
+cp .env.example .env   # fill in Mongo URI, JWT secrets, etc. (see below)
+npm run dev
 
----
+# Frontend (in a separate terminal)
+cd frontend
+npm install
+cp .env.example .env.local
+npm start
+```
 
-### Step 4 — Connect Everything
-1. Go back to **Render** → your backend service → **Environment**
-2. Update `CLIENT_URL` to your Vercel URL:
-   ```
-   CLIENT_URL=https://sareebazaar.vercel.app
-   ```
-3. Click **Save Changes** — Render will redeploy automatically
+The frontend runs at `http://localhost:3000` and proxies API calls to the
+backend at `http://localhost:5000`.
 
----
+### Seed demo data
 
-### Step 5 — Razorpay Webhook (for reliable payment confirmation)
-1. Go to **Razorpay Dashboard** → **Settings** → **Webhooks** → **Add Webhook**
-2. URL: `https://sareebazaar-api.onrender.com/api/v1/payments/webhook/razorpay`
-3. Secret: same as your `RAZORPAY_WEBHOOK_SECRET` in `.env`
-4. Events: check `payment.captured` and `payment.failed`
+```bash
+cd backend
+npm run seed
+```
 
----
+This creates demo accounts you can log in with immediately:
 
-## 🔑 Default Accounts (after running `npm run seed`)
 | Role | Email | Password |
 |---|---|---|
 | Admin | admin@sareebazaar.com | Admin@1234 |
 | Vendor | vendor@sareebazaar.com | Vendor@1234 |
 | Customer | user@sareebazaar.com | User@1234 |
+
+---
+
+## ✦ Environment Variables
+
+The backend needs a `backend/.env` (see `backend/.env.example` for the full,
+annotated list):
+
+```bash
+MONGO_URI=
+JWT_SECRET=
+JWT_REFRESH_SECRET=
+CLIENT_URL=http://localhost:3000
+
+# Optional but required for the related features to work:
+SMTP_EMAIL=            # order/account emails
+CLOUDINARY_CLOUD_NAME= # product image uploads
+RAZORPAY_KEY_ID=       # checkout payments
+```
+
+The frontend needs a `frontend/.env.local`:
+
+```bash
+REACT_APP_API_URL=http://localhost:5000/api/v1
+REACT_APP_RAZORPAY_KEY_ID=
+```
+
+---
+
+## ✦ Deployment
+
+- **Database**: [MongoDB Atlas](https://cloud.mongodb.com) free M0 cluster.
+- **Backend**: any Node host (e.g. [Render](https://render.com)) — root
+  directory `backend`, build `npm install`, start `npm start`.
+- **Frontend**: any static host (e.g. [Vercel](https://vercel.com)) — root
+  directory `frontend`, build `npm run build`, output `build`.
+- Set `CLIENT_URL` on the backend to the deployed frontend URL for CORS, and
+  configure the Razorpay webhook to point at
+  `<backend-url>/api/v1/payments/webhook/razorpay`.
+
+---
+
+## ✦ Connect & Socials
+
+- **GitHub**: [@NakS15](https://github.com/NakS15)
+- **LinkedIn**: [in/nakul-bukkawar](https://www.linkedin.com/in/nakul-bukkawar-115a89204/)
+- **Email**: [nakulbukkawar07@gmail.com](mailto:nakulbukkawar07@gmail.com)
+
 
 ---
 
