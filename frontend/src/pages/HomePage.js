@@ -74,7 +74,7 @@ export default function HomePage() {
       {/* Hero */}
       <section className="relative">
         <Swiper modules={[Autoplay, Pagination, EffectFade]} effect="fade"
-          fadeEffect={{ crossFade: true }}
+          fadeEffect={{ crossFade: false }} speed={1100}
           autoplay={{ delay: 6500, disableOnInteraction: false }}
           pagination={{ clickable: true }} loop className="hero-swiper h-[78vh] min-h-[560px]">
           {HERO_SLIDES.map((slide, i) => (

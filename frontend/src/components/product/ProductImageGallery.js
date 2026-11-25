@@ -58,17 +58,15 @@ export default function ProductImageGallery({ images = [] }) {
           onMouseMove={handleMouseMove}
           onClick={() => setLightbox(true)}
         >
-          <AnimatePresence mode="wait">
-            <motion.img
-              key={activeIndex}
-              src={images[activeIndex]?.url}
-              alt={images[activeIndex]?.alt || 'Saree'}
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className={`w-full h-full object-cover transition-transform duration-200 ${isZoomed ? 'scale-150' : 'scale-100'}`}
-              style={isZoomed ? { transformOrigin: `${zoomPos.x}% ${zoomPos.y}%` } : {}}
+          {images.map((img, i) => (
+            <img
+              key={i}
+              src={img.url}
+              alt={i === activeIndex ? (img.alt || 'Saree') : ''}
+              className={`absolute inset-0 w-full h-full object-cover transition-[opacity,transform] duration-500 ease-out ${i === activeIndex ? 'opacity-100' : 'opacity-0 pointer-events-none'} ${isZoomed && i === activeIndex ? 'scale-150' : 'scale-100'}`}
+              style={isZoomed && i === activeIndex ? { transformOrigin: `${zoomPos.x}% ${zoomPos.y}%` } : {}}
             />
-          </AnimatePresence>
+          ))}
 
           <button onClick={(e) => { e.stopPropagation(); setLightbox(true); }} aria-label="Enlarge image"
             className="absolute top-4 right-4 bg-ivory/90 w-10 h-10 flex items-center justify-center rounded-full hover:bg-ivory transition-colors">
