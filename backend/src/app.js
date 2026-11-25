@@ -35,6 +35,21 @@ const adminRoutes    = require('./routes/admin.routes');
 
 const app = express();
 
+const isProd = process.env.NODE_ENV === 'production';
+
+// Refuse to run in production with missing or placeholder secrets.
+if (isProd) {
+  const required = ['JWT_SECRET', 'JWT_REFRESH_SECRET', 'SESSION_SECRET'];
+  const weak = required.filter((k) => !process.env[k] || process.env[k].length < 32 || /change_this|REPLACE_WITH/i.test(process.env[k]));
+  if (weak.length) {
+    logger.error(`Set strong values (32+ random characters) for: ${weak.join(', ')}`);
+    process.exit(1);
+  }
+}
+
+// Render and similar hosts sit behind one proxy; needed for real client IPs (rate limiting) and secure cookies.
+if (isProd) app.set('trust proxy', 1);
+
 // ─── Security Middleware ──────────────────────────────────────────────────────
 app.use(helmet());
 app.use(mongoSanitize());
@@ -59,10 +74,18 @@ const authLimiter = rateLimit({
 app.use('/api/v1/auth/login',    authLimiter);
 app.use('/api/v1/auth/register', authLimiter);
 
+// OTP and password-reset endpoints can be brute-forced or abused for SMS/email spam; each gets its own counter
+const sensitiveLimiter = () => rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: { success: false, message: 'Too many attempts, please try again later.' },
+});
+['send-otp', 'verify-otp', 'forgot-password', 'reset-password', 'resend-verification', 'verify-email-code'].forEach((p) => app.use(`/api/v1/auth/${p}`, sensitiveLimiter()));
+
 // ─── CORS ─────────────────────────────────────────────────────────────────────
 app.use(cors({
   origin: (origin, cb) => {
-    const allowed = [process.env.CLIENT_URL, 'http://localhost:3000'].filter(Boolean);
+    const allowed = [process.env.CLIENT_URL, !isProd && 'http://localhost:3000'].filter(Boolean);
     if (!origin || allowed.includes(origin)) return cb(null, true);
     cb(new Error(`CORS blocked: ${origin}`));
   },
@@ -73,8 +96,8 @@ app.use(cors({
 
 // ─── Body Parsing ─────────────────────────────────────────────────────────────
 app.use('/api/v1/payments/webhook/razorpay', express.raw({ type: 'application/json' }));
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 app.use(cookieParser());
 app.use(compression());
 
@@ -87,11 +110,11 @@ if (process.env.NODE_ENV === 'development') {
 
 // ─── Passport / Session ───────────────────────────────────────────────────────
 app.use(session({
-  secret:            process.env.SESSION_SECRET || 'sareebazaar-session',
+  secret:            process.env.SESSION_SECRET || 'dev-only-session-secret',
   resave:            false,
   saveUninitialized: false,
   store:             new MemoryStore({ checkPeriod: 86400000 }),
-  cookie:            { secure: false, maxAge: 24 * 60 * 60 * 1000 },
+  cookie:            { secure: isProd, httpOnly: true, sameSite: 'lax', maxAge: 24 * 60 * 60 * 1000 },
 }));
 app.use(passport.initialize());
 app.use(passport.session());
@@ -107,7 +130,7 @@ if (
 }
 
 // ─── Health Check ─────────────────────────────────────────────────────────────
-app.get('/health', (req, res) => res.json({ status: 'ok', env: process.env.NODE_ENV, timestamp: new Date().toISOString() }));
+app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
 // ─── Serve local uploads ──────────────────────────────────────────────────────
 const path = require('path');

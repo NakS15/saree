@@ -75,12 +75,26 @@ exports.getVendorOrders = async (req, res) => {
 };
 
 // ─── PUT /orders/:id/vendor-update ───────────────────────────────────────────
+const VENDOR_STATUSES = ['processing', 'shipped', 'out_for_delivery', 'delivered'];
+const FINAL_STATUSES  = ['cancelled', 'returned', 'refunded'];
+
+const findVendorOrder = async (orderId, userId) => {
+  const vendor = await Vendor.findOne({ user: userId });
+  if (!vendor) return {};
+  const order = await Order.findOne({ _id: orderId, 'items.vendor': vendor._id });
+  return { vendor, order };
+};
+
 exports.updateOrderStatus = async (req, res, next) => {
   const { status, note } = req.body;
-  const order = await Order.findById(req.params.id);
+  if (!VENDOR_STATUSES.includes(status)) return next(new ErrorResponse('Invalid status', 400));
+
+  const { order } = await findVendorOrder(req.params.id, req.user.id);
   if (!order) return next(new ErrorResponse('Order not found', 404));
+  if (FINAL_STATUSES.includes(order.status)) return next(new ErrorResponse('Order can no longer be updated', 400));
 
   order.status = status;
+  if (status === 'delivered') order.set('shipping.deliveredAt', new Date());
   order.statusHistory.push({ status, note, updatedBy: req.user.id });
   await order.save();
 
@@ -89,9 +103,9 @@ exports.updateOrderStatus = async (req, res, next) => {
 
 // ─── POST /orders/:id/create-shipment ────────────────────────────────────────
 exports.createShipment = async (req, res, next) => {
-  const order  = await Order.findById(req.params.id).populate('user', 'email name');
-  const vendor = await Vendor.findOne({ user: req.user.id });
-  if (!order || !vendor) return next(new ErrorResponse('Order or vendor not found', 404));
+  const { vendor, order: owned } = await findVendorOrder(req.params.id, req.user.id);
+  if (!owned) return next(new ErrorResponse('Order or vendor not found', 404));
+  const order = await Order.findById(owned._id).populate('user', 'email name');
 
   try {
     const result = await shiprocket.createOrder(order, vendor);
@@ -115,6 +129,8 @@ exports.createShipment = async (req, res, next) => {
 exports.trackOrder = async (req, res, next) => {
   const order = await Order.findById(req.params.id);
   if (!order) return next(new ErrorResponse('Order not found', 404));
+  if (order.user.toString() !== req.user.id && req.user.role !== 'admin')
+    return next(new ErrorResponse('Not authorized', 403));
   if (!order.shipping?.awbCode) return res.status(200).json({ success: true, data: { status: order.status } });
 
   const tracking = await shiprocket.trackOrder(order.shipping.awbCode);

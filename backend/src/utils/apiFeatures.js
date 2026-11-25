@@ -2,6 +2,12 @@
  * APIFeatures — chainable helper for filtering, sorting, and pagination.
  * Usage: new APIFeatures(Model.find(), req.query).filter().sort().paginate()
  */
+// Only these fields may be filtered from the query string; anything else (e.g. status) is dropped.
+const FILTERABLE = new Set([
+  'category', 'vendor', 'price', 'rating', 'colors', 'tags', 'isFeatured', 'isTrending',
+  'attributes.fabric', 'attributes.occasion', 'attributes.workType', 'attributes.blousePieceIncluded',
+]);
+
 class APIFeatures {
   constructor(query, queryStr) {
     this.query      = query;
@@ -60,6 +66,8 @@ class APIFeatures {
         queryObj[flag] = queryObj[flag] === 'true';
       }
     });
+
+    Object.keys(queryObj).forEach((k) => { if (!FILTERABLE.has(k)) delete queryObj[k]; });
 
     // MongoDB operators ($gt, $gte, etc.)
     let str = JSON.stringify(queryObj);

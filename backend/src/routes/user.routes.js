@@ -24,6 +24,7 @@ router.put('/change-password', protect, async (req, res, next) => {
   if (!(await user.matchPassword(req.body.currentPassword)))
     return next(new ErrorResponse('Current password is incorrect', 401));
   user.password = req.body.newPassword;
+  user.refreshToken = undefined; // sign out other sessions
   await user.save();
   res.status(200).json({ success: true, message: 'Password updated' });
 });

@@ -9,6 +9,7 @@ import { selectCartItems, selectCartSubtotal, resetCart } from '../features/cart
 import { paymentService } from '../services';
 import { formatPrice, loadRazorpay } from '../utils/helpers';
 import api from '../services/api';
+import VerifyPrompt from '../components/auth/VerifyPrompt';
 
 const STEPS = ['Address', 'Delivery', 'Payment', 'Review'];
 
@@ -19,6 +20,7 @@ export default function CheckoutPage() {
   const items     = useSelector(selectCartItems);
   const subtotal  = useSelector(selectCartSubtotal);
   const { couponCode, couponDiscount } = useSelector((s) => s.cart);
+  const verified = Boolean(user?.isEmailVerified || user?.isPhoneVerified);
 
   const [step,        setStep]        = useState(0);
   const [addresses,   setAddresses]   = useState(user?.addresses || []);
@@ -109,6 +111,8 @@ export default function CheckoutPage() {
 
   return (
     <div className="page-container py-8">
+      {!verified && <VerifyPrompt email={user?.email} />}
+
       {/* Steps */}
       <div className="flex items-center justify-center mb-10">
         {STEPS.map((s, i) => (
@@ -253,8 +257,8 @@ export default function CheckoutPage() {
               </div>
               <div className="flex gap-3">
                 <button onClick={() => setStep(2)} className="btn-secondary flex-1 py-3">← Back</button>
-                <button onClick={handlePayment} disabled={processing} className="btn-primary flex-1 py-3 text-base">
-                  {processing ? 'Processing...' : payMethod === 'cod' ? 'Place Order (COD)' : `Pay ${formatPrice(total)}`}
+                <button onClick={handlePayment} disabled={processing || !verified} className="btn-primary flex-1 py-3 text-base disabled:opacity-50">
+                  {!verified ? 'Verify email to continue' : processing ? 'Processing...' : payMethod === 'cod' ? 'Place Order (COD)' : `Pay ${formatPrice(total)}`}
                 </button>
               </div>
             </div>

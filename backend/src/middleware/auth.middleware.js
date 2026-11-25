@@ -31,6 +31,12 @@ exports.authorize = (...roles) => (req, res, next) => {
   next();
 };
 
+// ─── Require a verified email or phone (use before taking an order) ────────────────────
+exports.requireVerified = (req, res, next) => {
+  if (req.user?.isEmailVerified || req.user?.isPhoneVerified) return next();
+  next(new ErrorResponse('Please verify your email before placing an order', 403));
+};
+
 // ─── Optional auth (attaches user if token present, doesn't fail if absent) ──
 exports.optionalAuth = async (req, res, next) => {
   try {

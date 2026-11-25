@@ -2,7 +2,13 @@ const Product   = require('../models/Product.model');
 const Vendor    = require('../models/Vendor.model');
 const APIFeatures = require('../utils/apiFeatures');
 const ErrorResponse = require('../utils/errorResponse');
+const pick = require('../utils/pick');
 const { cloudinary } = require('../config/cloudinary');
+
+const VENDOR_EDITABLE = [
+  'name', 'description', 'shortDescription', 'price', 'compareAtPrice', 'images', 'colors',
+  'stock', 'sku', 'attributes', 'tags', 'category', 'metaTitle', 'metaDescription',
+];
 
 // ─── GET /products ────────────────────────────────────────────────────────────
 exports.getProducts = async (req, res) => {
@@ -14,7 +20,7 @@ exports.getProducts = async (req, res) => {
   ).filter().sort().paginate();
 
   const products    = await features.query;
-  const total       = await Product.countDocuments(features.filterQuery);
+  const total       = await Product.countDocuments({ ...features.filterQuery, status: 'active' });
   const totalPages  = Math.ceil(total / (req.query.limit || 12));
 
   res.status(200).json({ success: true, total, totalPages, data: products });
@@ -90,7 +96,7 @@ exports.createProduct = async (req, res, next) => {
   const vendor = await Vendor.findOne({ user: req.user.id, status: 'active' });
   if (!vendor) return next(new ErrorResponse('Active vendor account required to list products', 403));
 
-  const product = await Product.create({ ...req.body, vendor: vendor._id, status: 'pending_approval' });
+  const product = await Product.create({ ...pick(req.body, VENDOR_EDITABLE), vendor: vendor._id, status: 'pending_approval' });
   res.status(201).json({ success: true, data: product });
 };
 
@@ -100,10 +106,11 @@ exports.updateProduct = async (req, res, next) => {
   let product   = await Product.findOne({ _id: req.params.id, vendor: vendor?._id });
   if (!product) return next(new ErrorResponse('Product not found', 404));
 
-  // Re-submit for approval if price/images changed
-  if (req.body.price || req.body.images) req.body.status = 'pending_approval';
+  const update = pick(req.body, VENDOR_EDITABLE);
+  // Re-submit for approval if anything customers see or pay for changed
+  if (['price', 'images', 'name', 'description'].some((k) => k in update)) update.status = 'pending_approval';
 
-  product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+  product = await Product.findByIdAndUpdate(req.params.id, update, { new: true, runValidators: true });
   res.status(200).json({ success: true, data: product });
 };
 

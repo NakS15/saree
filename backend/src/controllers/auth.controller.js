@@ -4,6 +4,7 @@ const User     = require('../models/User.model');
 const ErrorResponse = require('../utils/errorResponse');
 const sendEmail     = require('../utils/sendEmail');
 const logger        = require('../config/logger');
+const { generateOTP, hashOTP, otpMatches, OTP_TTL_MS, OTP_MAX_ATTEMPTS, OTP_RESEND_COOLDOWN_MS } = require('../utils/otp');
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const signAccess   = (id) => jwt.sign({ id }, process.env.JWT_SECRET,         { expiresIn: process.env.JWT_EXPIRE });
@@ -37,6 +38,7 @@ const sendTokens = async (user, statusCode, res) => {
         role:            user.role,
         avatar:          user.avatar,
         isEmailVerified: user.isEmailVerified,
+        isPhoneVerified: user.isPhoneVerified,
       },
     });
 };
@@ -50,10 +52,13 @@ exports.register = async (req, res, next) => {
 
   const user  = await User.create({ name, email, password, phone, role: role === 'vendor' ? 'vendor' : 'customer' });
   const token = user.createEmailVerificationToken();
+  const code  = generateOTP();
+  user.emailOTP = hashOTP(code); user.emailOTPExpire = Date.now() + OTP_TTL_MS; user.emailOTPAttempts = 0;
   await user.save({ validateBeforeSave: false });
 
   const verifyUrl = `${process.env.CLIENT_URL}/verify-email/${token}`;
-  await sendEmail({ to: email, template: 'emailVerification', data: { name, verifyUrl } });
+  // Registration still succeeds if the email can't be sent; the user can request a new one from checkout.
+  await sendEmail({ to: email, template: 'emailVerification', data: { name, verifyUrl, code } });
 
   await sendTokens(user, 201, res);
 };
@@ -99,6 +104,55 @@ exports.verifyEmail = async (req, res, next) => {
   user.isEmailVerified       = true;
   user.emailVerificationToken   = undefined;
   user.emailVerificationExpire  = undefined;
+  user.emailOTP = undefined; user.emailOTPExpire = undefined;
+  await user.save({ validateBeforeSave: false });
+
+  res.status(200).json({ success: true, message: 'Email verified successfully' });
+};
+
+// ─── Resend verification (link + code) ──────────────────────────────────────────────────
+exports.resendVerification = async (req, res, next) => {
+  const user = await User.findById(req.user.id).select('+emailOTPExpire');
+  if (user.isEmailVerified) return next(new ErrorResponse('Your email is already verified', 400));
+
+  // emailOTPExpire - TTL = when the last code was sent
+  const lastSent = user.emailOTPExpire ? user.emailOTPExpire.getTime() - OTP_TTL_MS : 0;
+  if (Date.now() - lastSent < OTP_RESEND_COOLDOWN_MS)
+    return next(new ErrorResponse('Please wait a minute before requesting another code', 429));
+
+  const token = user.createEmailVerificationToken();
+  const code  = generateOTP();
+  user.emailOTP = hashOTP(code); user.emailOTPExpire = Date.now() + OTP_TTL_MS; user.emailOTPAttempts = 0;
+  await user.save({ validateBeforeSave: false });
+
+  const verifyUrl = `${process.env.CLIENT_URL}/verify-email/${token}`;
+  const sent = await sendEmail({ to: user.email, template: 'emailVerification', data: { name: user.name, verifyUrl, code } });
+  if (!sent) return next(new ErrorResponse('We could not send the email right now. Please try again shortly.', 503));
+
+  res.status(200).json({
+    success: true,
+    message: 'Verification email sent',
+    ...(process.env.NODE_ENV === 'development' && { devCode: code }),
+  });
+};
+
+// ─── Verify email with the 6-digit code ──────────────────────────────────────
+exports.verifyEmailCode = async (req, res, next) => {
+  const user = await User.findById(req.user.id).select('+emailOTP +emailOTPExpire +emailOTPAttempts');
+  if (user.isEmailVerified) return res.status(200).json({ success: true, message: 'Email already verified' });
+
+  const invalid = () => next(new ErrorResponse('Invalid or expired code', 400));
+  if (!user.emailOTP || !user.emailOTPExpire || user.emailOTPExpire < Date.now() || user.emailOTPAttempts >= OTP_MAX_ATTEMPTS) return invalid();
+
+  if (!otpMatches(user.emailOTP, req.body.code)) {
+    user.emailOTPAttempts += 1;
+    await user.save({ validateBeforeSave: false });
+    return invalid();
+  }
+
+  user.isEmailVerified = true;
+  user.emailOTP = undefined; user.emailOTPExpire = undefined; user.emailOTPAttempts = 0;
+  user.emailVerificationToken = undefined; user.emailVerificationExpire = undefined;
   await user.save({ validateBeforeSave: false });
 
   res.status(200).json({ success: true, message: 'Email verified successfully' });
@@ -107,16 +161,16 @@ exports.verifyEmail = async (req, res, next) => {
 // ─── Send Phone OTP ───────────────────────────────────────────────────────────
 exports.sendPhoneOTP = async (req, res, next) => {
   const { phone } = req.body;
-  if (!phone) return next(new ErrorResponse('Phone number required', 400));
+  if (!phone || typeof phone !== 'string') return next(new ErrorResponse('Phone number required', 400));
 
-  const otp     = Math.floor(100000 + Math.random() * 900000).toString();
-  const expires = Date.now() + 10 * 60 * 1000; // 10 min
+  const otp     = generateOTP();
+  const expires = Date.now() + OTP_TTL_MS;
 
   let user = await User.findOne({ phone });
   if (!user) {
-    user = await User.create({ phone, name: 'User', password: crypto.randomBytes(20).toString('hex'), phoneOTP: otp, phoneOTPExpire: expires });
+    user = await User.create({ phone, name: 'User', password: crypto.randomBytes(20).toString('hex'), phoneOTP: hashOTP(otp), phoneOTPExpire: expires, phoneOTPAttempts: 0 });
   } else {
-    user.phoneOTP = otp; user.phoneOTPExpire = expires;
+    user.phoneOTP = hashOTP(otp); user.phoneOTPExpire = expires; user.phoneOTPAttempts = 0;
     await user.save({ validateBeforeSave: false });
   }
 
@@ -133,26 +187,34 @@ exports.sendPhoneOTP = async (req, res, next) => {
 // ─── Verify OTP ───────────────────────────────────────────────────────────────
 exports.verifyOTP = async (req, res, next) => {
   const { phone, otp } = req.body;
-  const user = await User.findOne({ phone, phoneOTP: otp, phoneOTPExpire: { $gt: Date.now() } });
-  if (!user) return next(new ErrorResponse('Invalid or expired OTP', 400));
+  const user = await User.findOne({ phone: String(phone || '') }).select('+phoneOTP +phoneOTPExpire +phoneOTPAttempts');
+  const invalid = () => next(new ErrorResponse('Invalid or expired OTP', 400));
+  if (!user || !user.phoneOTP || !user.phoneOTPExpire || user.phoneOTPExpire < Date.now() || user.phoneOTPAttempts >= OTP_MAX_ATTEMPTS) return invalid();
 
-  user.isPhoneVerified = true; user.phoneOTP = undefined; user.phoneOTPExpire = undefined;
+  if (!otpMatches(user.phoneOTP, otp)) {
+    user.phoneOTPAttempts += 1;
+    await user.save({ validateBeforeSave: false });
+    return invalid();
+  }
+
+  user.isPhoneVerified = true; user.phoneOTP = undefined; user.phoneOTPExpire = undefined; user.phoneOTPAttempts = 0;
   await user.save({ validateBeforeSave: false });
   await sendTokens(user, 200, res);
 };
 
 // ─── Forgot Password ──────────────────────────────────────────────────────────
 exports.forgotPassword = async (req, res, next) => {
+  const sameReply = { success: true, message: 'If that email exists, a reset link has been sent.' };
   const user = await User.findOne({ email: req.body.email });
-  if (!user) return res.status(200).json({ success: true, message: 'If that email exists, a reset link has been sent.' });
+  if (!user) return res.status(200).json(sameReply);
 
   const token    = user.createPasswordResetToken();
   await user.save({ validateBeforeSave: false });
 
   const resetUrl = `${process.env.CLIENT_URL}/reset-password/${token}`;
-  await sendEmail({ to: user.email, template: 'passwordReset', data: { name: user.name, resetUrl } });
+  await sendEmail({ to: user.email, template: 'passwordReset', data: { name: user.name, resetUrl } }).catch((e) => logger.error(`Reset email failed: ${e.message}`));
 
-  res.status(200).json({ success: true, message: 'Password reset email sent' });
+  res.status(200).json(sameReply);
 };
 
 // ─── Reset Password ───────────────────────────────────────────────────────────

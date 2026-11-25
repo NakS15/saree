@@ -21,11 +21,23 @@ const categories = [
   { name: 'Handloom Sarees',  slug: 'handloom-sarees',  order: 9 },
 ];
 
+const crypto = require('crypto');
+
+// Demo passwords are only used against a local database; any other DB gets random ones.
+const isLocalDb = /(localhost|127\.0\.0\.1)/.test(process.env.MONGO_URI || '');
+const pw = (demo) => (isLocalDb ? demo : crypto.randomBytes(12).toString('base64url') + '!9aA');
+const passwords = { admin: pw('Admin@1234'), vendor: pw('Vendor@1234'), user: pw('User@1234') };
+
 const users = [
-  { name: 'Admin User',     email: 'admin@sareebazaar.com',  password: 'Admin@1234',  role: 'admin',    isEmailVerified: true },
-  { name: 'Priya Textiles', email: 'vendor@sareebazaar.com', password: 'Vendor@1234', role: 'vendor',   isEmailVerified: true },
-  { name: 'Ananya Sharma',  email: 'user@sareebazaar.com',   password: 'User@1234',   role: 'customer', isEmailVerified: true },
+  { name: 'Admin User',     email: 'admin@sareebazaar.com',  password: passwords.admin,  role: 'admin',    isEmailVerified: true },
+  { name: 'Priya Textiles', email: 'vendor@sareebazaar.com', password: passwords.vendor, role: 'vendor',   isEmailVerified: true },
+  { name: 'Ananya Sharma',  email: 'user@sareebazaar.com',   password: passwords.user,   role: 'customer', isEmailVerified: true },
 ];
+
+if (process.env.NODE_ENV === 'production') {
+  console.error('Refusing to run the seeder with NODE_ENV=production.');
+  process.exit(1);
+}
 
 const importData = async () => {
   await mongoose.connect(process.env.MONGO_URI);
@@ -109,9 +121,9 @@ const importData = async () => {
 
   logger.info('\n✅ Database seeded successfully!');
   logger.info('─────────────────────────────────────────');
-  logger.info('Admin:    admin@sareebazaar.com  / Admin@1234');
-  logger.info('Vendor:   vendor@sareebazaar.com / Vendor@1234');
-  logger.info('Customer: user@sareebazaar.com   / User@1234');
+  logger.info(`Admin:    admin@sareebazaar.com  / ${passwords.admin}`);
+  logger.info(`Vendor:   vendor@sareebazaar.com / ${passwords.vendor}`);
+  logger.info(`Customer: user@sareebazaar.com   / ${passwords.user}`);
   logger.info('─────────────────────────────────────────\n');
 
   process.exit(0);

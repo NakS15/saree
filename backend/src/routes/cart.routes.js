@@ -6,6 +6,8 @@ const Product = require('../models/Product.model');
 const Coupon  = require('../models/Coupon.model');
 const ErrorResponse = require('../utils/errorResponse');
 
+const MAX_QTY = 10;
+
 // GET /cart
 router.get('/', protect, async (req, res) => {
   const cart = await Cart.findOne({ user: req.user.id }).populate('items.product', 'name slug images price stock attributes vendor');
@@ -14,17 +16,22 @@ router.get('/', protect, async (req, res) => {
 
 // POST /cart/add
 router.post('/add', protect, async (req, res, next) => {
-  const { productId, quantity = 1, color } = req.body;
+  const { productId, color } = req.body;
+  const quantity = req.body.quantity === undefined ? 1 : Number(req.body.quantity);
+  if (!Number.isInteger(quantity) || quantity < 1 || quantity > MAX_QTY) return next(new ErrorResponse(`Quantity must be between 1 and ${MAX_QTY}`, 400));
+
   const product = await Product.findById(productId);
   if (!product || product.status !== 'active') return next(new ErrorResponse('Product not available', 400));
-  if (product.stock < quantity) return next(new ErrorResponse('Insufficient stock', 400));
 
   let cart = await Cart.findOne({ user: req.user.id });
   if (!cart) cart = new Cart({ user: req.user.id, items: [] });
 
-  const idx = cart.items.findIndex((i) => i.product.toString() === productId && i.color === color);
-  if (idx > -1) cart.items[idx].quantity += quantity;
-  else cart.items.push({ product: productId, quantity, price: product.price, color });
+  const idx = cart.items.findIndex((i) => i.product.toString() === String(productId) && i.color === color);
+  const newQty = (idx > -1 ? cart.items[idx].quantity : 0) + quantity;
+  if (newQty > MAX_QTY || product.stock < newQty) return next(new ErrorResponse('Insufficient stock', 400));
+
+  if (idx > -1) cart.items[idx].quantity = newQty;
+  else cart.items.push({ product: productId, quantity, price: product.price, color: typeof color === 'string' ? color : undefined });
 
   cart.subtotal = cart.items.reduce((s, i) => s + i.price * i.quantity, 0);
   await cart.save();
@@ -34,7 +41,8 @@ router.post('/add', protect, async (req, res, next) => {
 
 // PUT /cart/:itemId
 router.put('/:itemId', protect, async (req, res, next) => {
-  const { quantity } = req.body;
+  const quantity = Number(req.body.quantity);
+  if (!Number.isInteger(quantity) || quantity > MAX_QTY) return next(new ErrorResponse(`Quantity must be a whole number up to ${MAX_QTY}`, 400));
   const cart = await Cart.findOne({ user: req.user.id });
   if (!cart) return next(new ErrorResponse('Cart not found', 404));
 
@@ -42,7 +50,11 @@ router.put('/:itemId', protect, async (req, res, next) => {
   if (!item) return next(new ErrorResponse('Item not found', 404));
 
   if (quantity <= 0) cart.items.pull({ _id: req.params.itemId });
-  else item.quantity = quantity;
+  else {
+    const product = await Product.findById(item.product);
+    if (!product || product.stock < quantity) return next(new ErrorResponse('Insufficient stock', 400));
+    item.quantity = quantity;
+  }
 
   cart.subtotal = cart.items.reduce((s, i) => s + i.price * i.quantity, 0);
   await cart.save();

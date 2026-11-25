@@ -13,7 +13,7 @@ const transporter = nodemailer.createTransport({
 
 // ─── Email templates ──────────────────────────────────────────────────────────
 const templates = {
-  emailVerification: ({ name, verifyUrl }) => ({
+  emailVerification: ({ name, verifyUrl, code }) => ({
     subject: '✅ Verify Your SareeBazaar Account',
     html: `
       <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 20px rgba(0,0,0,0.08)">
@@ -26,7 +26,8 @@ const templates = {
           <div style="text-align:center;margin:32px 0">
             <a href="${verifyUrl}" style="background:#c41e3a;color:#fff;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px">Verify Email</a>
           </div>
-          <p style="color:#9ca3af;font-size:12px">Link expires in 24 hours. If you didn't create an account, ignore this email.</p>
+          ${code ? `<p style="color:#6b7280;text-align:center">Or enter this code at checkout:</p><p style="text-align:center;font-size:30px;letter-spacing:8px;font-weight:bold;color:#1f2937;margin:8px 0">${code}</p>` : ''}
+          <p style="color:#9ca3af;font-size:12px">The code is valid for 10 minutes and the link for 24 hours. If you didn't create an account, ignore this email.</p>
         </div>
       </div>`,
   }),
@@ -80,14 +81,16 @@ const templates = {
 };
 
 // ─── Main send function ───────────────────────────────────────────────────────
+// Resolves true when the email was sent (or, outside production, logged); false when it could not be delivered.
 const sendEmail = async ({ to, template, data, subject, html }) => {
-  // In development without SMTP configured, just log the email
-  if (!process.env.SMTP_EMAIL || process.env.SMTP_EMAIL === 'your_email@gmail.com') {
-    logger.info(`[EMAIL SKIPPED - no SMTP] To: ${to} | Template: ${template || 'custom'}`);
+  // Without SMTP configured, log the email in development; in production report failure
+  if (!process.env.SMTP_EMAIL || /^your_/.test(process.env.SMTP_EMAIL)) {
+    logger.warn(`[EMAIL NOT SENT - SMTP not configured] To: ${to} | Template: ${template || 'custom'}`);
+    if (process.env.NODE_ENV === 'production') return false;
     if (data?.verifyUrl)  logger.info(`  Verify URL:  ${data.verifyUrl}`);
     if (data?.resetUrl)   logger.info(`  Reset URL:   ${data.resetUrl}`);
-    if (data?.devOTP)     logger.info(`  OTP:         ${data.devOTP}`);
-    return;
+    if (data?.code)       logger.info(`  Code:        ${data.code}`);
+    return true;
   }
   try {
     let emailSubject = subject;
@@ -107,9 +110,11 @@ const sendEmail = async ({ to, template, data, subject, html }) => {
     });
 
     logger.info(`Email sent: ${template || 'custom'} → ${to}`);
+    return true;
   } catch (err) {
     logger.error(`Email send failed to ${to}: ${err.message}`);
-    // Don't throw — email failure should not break the request
+    // Don't throw — email failure should not break the request; callers that care check the result
+    return false;
   }
 };
 

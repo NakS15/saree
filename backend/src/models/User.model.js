@@ -38,8 +38,12 @@ const userSchema = new mongoose.Schema({
   refreshToken: { type: String, select: false },
   emailVerificationToken: { type: String, select: false },
   emailVerificationExpire: { type: Date, select: false },
+  emailOTP: { type: String, select: false },
+  emailOTPExpire: { type: Date, select: false },
+  emailOTPAttempts: { type: Number, default: 0, select: false },
   phoneOTP: { type: String, select: false },
   phoneOTPExpire: { type: Date, select: false },
+  phoneOTPAttempts: { type: Number, default: 0, select: false },
   passwordResetToken: { type: String, select: false },
   passwordResetExpire: { type: Date, select: false },
 

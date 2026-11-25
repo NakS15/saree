@@ -4,12 +4,20 @@ const Vendor   = require('../models/Vendor.model');
 const Product  = require('../models/Product.model');
 const { protect, authorize } = require('../middleware/auth.middleware');
 const ErrorResponse = require('../utils/errorResponse');
+const pick = require('../utils/pick');
+
+const PROFILE_FIELDS = [
+  'businessName', 'businessEmail', 'businessPhone', 'businessDescription', 'logo', 'banner',
+  'businessAddress', 'bankDetails', 'returnPolicy', 'shippingPolicy',
+];
+const KYC_FIELDS = ['panNumber', 'gstNumber', 'aadharNumber', 'panDocument', 'gstDocument', 'aadharDocument'];
 
 // Register as vendor
 router.post('/register', protect, async (req, res, next) => {
   const existing = await Vendor.findOne({ user: req.user.id });
   if (existing) return next(new ErrorResponse('Vendor account already exists', 400));
-  const vendor = await Vendor.create({ ...req.body, user: req.user.id });
+  if (req.user.role === 'admin') return next(new ErrorResponse('Admin accounts cannot become vendors', 400));
+  const vendor = await Vendor.create({ ...pick(req.body, PROFILE_FIELDS), user: req.user.id });
   const User   = require('../models/User.model');
   await User.findByIdAndUpdate(req.user.id, { role: 'vendor' });
   res.status(201).json({ success: true, data: vendor });
@@ -19,7 +27,7 @@ router.post('/register', protect, async (req, res, next) => {
 router.post('/kyc', protect, authorize('vendor'), async (req, res, next) => {
   const vendor = await Vendor.findOne({ user: req.user.id });
   if (!vendor) return next(new ErrorResponse('Vendor account not found', 404));
-  vendor.kyc = { ...vendor.kyc, ...req.body, status: 'submitted', submittedAt: new Date() };
+  vendor.kyc = { ...vendor.kyc, ...pick(req.body, KYC_FIELDS), status: 'submitted', submittedAt: new Date() };
   await vendor.save();
   res.status(200).json({ success: true, data: vendor });
 });
@@ -33,7 +41,7 @@ router.get('/profile', protect, authorize('vendor'), async (req, res, next) => {
 
 // Update my vendor profile
 router.put('/profile', protect, authorize('vendor'), async (req, res, next) => {
-  const vendor = await Vendor.findOneAndUpdate({ user: req.user.id }, req.body, { new: true, runValidators: true });
+  const vendor = await Vendor.findOneAndUpdate({ user: req.user.id }, pick(req.body, PROFILE_FIELDS), { new: true, runValidators: true });
   if (!vendor) return next(new ErrorResponse('Vendor profile not found', 404));
   res.status(200).json({ success: true, data: vendor });
 });

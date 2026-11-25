@@ -21,6 +21,8 @@ router.post('/login',           loginRules,    validate, ctrl.login);
 router.post('/logout',          protect,               ctrl.logout);
 router.post('/refresh-token',                          ctrl.refreshToken);
 router.get ('/verify-email/:token',                    ctrl.verifyEmail);
+router.post('/resend-verification', protect,            ctrl.resendVerification);
+router.post('/verify-email-code',   protect,            ctrl.verifyEmailCode);
 router.post('/send-otp',                               ctrl.sendPhoneOTP);
 router.post('/verify-otp',                             ctrl.verifyOTP);
 router.post('/forgot-password',                        ctrl.forgotPassword);

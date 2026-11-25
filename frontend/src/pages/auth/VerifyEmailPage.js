@@ -1,17 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import { motion } from 'framer-motion';
 import api from '../../services/api';
+import { fetchMe } from '../../features/auth/authSlice';
 
 export default function VerifyEmailPage() {
   const { token } = useParams();
+  const dispatch = useDispatch();
   const [status,  setStatus] = useState('loading'); // loading | success | error
 
   useEffect(() => {
     api.get(`/auth/verify-email/${token}`)
-      .then(() => setStatus('success'))
+      .then(() => {
+        setStatus('success');
+        if (localStorage.getItem('accessToken')) dispatch(fetchMe());
+      })
       .catch(() => setStatus('error'));
-  }, [token]);
+  }, [token, dispatch]);
 
   return (
     <div className="min-h-screen bg-ethnic-cream flex items-center justify-center px-4">

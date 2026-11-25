@@ -9,6 +9,7 @@ const reviewSchema = new mongoose.Schema({
   images:  [String],
   isVerifiedPurchase: { type: Boolean, default: false },
   helpfulCount:       { type: Number,  default: 0 },
+  helpfulBy:          { type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], select: false },
   isApproved:         { type: Boolean, default: true },
 }, { timestamps: true });
 

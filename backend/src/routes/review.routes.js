@@ -61,10 +61,13 @@ router.post('/:productId', protect, async (req, res, next) => {
 
 // POST /reviews/:reviewId/helpful
 router.post('/:reviewId/helpful', protect, async (req, res, next) => {
-  const review = await Review.findById(req.params.reviewId);
-  if (!review) return next(new ErrorResponse('Review not found', 404));
-  review.helpfulCount = (review.helpfulCount || 0) + 1;
-  await review.save();
+  // One helpful vote per user per review
+  const review = await Review.findOneAndUpdate(
+    { _id: req.params.reviewId, helpfulBy: { $ne: req.user._id } },
+    { $inc: { helpfulCount: 1 }, $addToSet: { helpfulBy: req.user._id } },
+    { new: true },
+  );
+  if (!review) return next(new ErrorResponse('Review not found or already marked helpful', 400));
   res.status(200).json({ success: true, data: { helpfulCount: review.helpfulCount } });
 });
 
