@@ -1,5 +1,5 @@
-import React, { useState, useCallback } from 'react';
-import { ChevronLeftIcon, ChevronRightIcon, MagnifyingGlassPlusIcon } from '@heroicons/react/24/outline';
+import React, { useState, useCallback, useEffect } from 'react';
+import { ChevronLeftIcon, ChevronRightIcon, MagnifyingGlassPlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function ProductImageGallery({ images = [] }) {
@@ -19,8 +19,19 @@ export default function ProductImageGallery({ images = [] }) {
   const prev = () => setActiveIndex((i) => (i === 0 ? images.length - 1 : i - 1));
   const next = () => setActiveIndex((i) => (i === images.length - 1 ? 0 : i + 1));
 
+  useEffect(() => {
+    if (!lightbox) return undefined;
+    const onKey = (e) => {
+      if (e.key === 'Escape') setLightbox(false);
+      if (e.key === 'ArrowLeft') prev();
+      if (e.key === 'ArrowRight') next();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  });
+
   if (!images.length) return (
-    <div className="aspect-[3/4] bg-gray-100 rounded-2xl flex items-center justify-center text-gray-400">No image</div>
+    <div className="aspect-[3/4] bg-ethnic-silk flex items-center justify-center text-gray-400 text-xs uppercase tracking-[0.2em]">No image</div>
   );
 
   return (
@@ -31,7 +42,7 @@ export default function ProductImageGallery({ images = [] }) {
           <button
             key={i}
             onClick={() => setActiveIndex(i)}
-            className={`aspect-square rounded-lg overflow-hidden border-2 transition-all duration-200 ${i === activeIndex ? 'border-primary-500 ring-2 ring-primary-200' : 'border-gray-200 hover:border-gray-400'}`}
+            className={`aspect-square overflow-hidden border transition-all duration-200 ${i === activeIndex ? 'border-ink' : 'border-transparent opacity-60 hover:opacity-100'}`}
           >
             <img src={img.url} alt={img.alt || `Image ${i+1}`} className="w-full h-full object-cover" />
           </button>
@@ -41,7 +52,7 @@ export default function ProductImageGallery({ images = [] }) {
       {/* Main image */}
       <div className="flex-1">
         <div
-          className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-gray-50 cursor-zoom-in"
+          className="relative aspect-[3/4] overflow-hidden bg-ethnic-silk cursor-zoom-in"
           onMouseEnter={() => setIsZoomed(true)}
           onMouseLeave={() => setIsZoomed(false)}
           onMouseMove={handleMouseMove}
@@ -59,29 +70,29 @@ export default function ProductImageGallery({ images = [] }) {
             />
           </AnimatePresence>
 
-          <button onClick={(e) => { e.stopPropagation(); setLightbox(true); }}
-            className="absolute top-4 right-4 bg-white/80 backdrop-blur-sm p-2 rounded-full shadow-md hover:bg-white transition-colors">
-            <MagnifyingGlassPlusIcon className="w-5 h-5 text-gray-700" />
+          <button onClick={(e) => { e.stopPropagation(); setLightbox(true); }} aria-label="Enlarge image"
+            className="absolute top-4 right-4 bg-ivory/90 w-10 h-10 flex items-center justify-center rounded-full hover:bg-ivory transition-colors">
+            <MagnifyingGlassPlusIcon className="w-5 h-5 text-ink" strokeWidth={1.25} />
           </button>
 
           {images.length > 1 && (
             <>
-              <button onClick={(e) => { e.stopPropagation(); prev(); }}
-                className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-sm p-2 rounded-full shadow-md hover:bg-white transition-colors">
-                <ChevronLeftIcon className="w-5 h-5 text-gray-700" />
+              <button onClick={(e) => { e.stopPropagation(); prev(); }} aria-label="Previous image"
+                className="absolute left-3 top-1/2 -translate-y-1/2 bg-ivory/90 w-10 h-10 flex items-center justify-center rounded-full hover:bg-ivory transition-colors">
+                <ChevronLeftIcon className="w-5 h-5 text-ink" strokeWidth={1.25} />
               </button>
-              <button onClick={(e) => { e.stopPropagation(); next(); }}
-                className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-sm p-2 rounded-full shadow-md hover:bg-white transition-colors">
-                <ChevronRightIcon className="w-5 h-5 text-gray-700" />
+              <button onClick={(e) => { e.stopPropagation(); next(); }} aria-label="Next image"
+                className="absolute right-3 top-1/2 -translate-y-1/2 bg-ivory/90 w-10 h-10 flex items-center justify-center rounded-full hover:bg-ivory transition-colors">
+                <ChevronRightIcon className="w-5 h-5 text-ink" strokeWidth={1.25} />
               </button>
             </>
           )}
 
           {/* Dots */}
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5">
+          <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-2">
             {images.map((_, i) => (
-              <button key={i} onClick={(e) => { e.stopPropagation(); setActiveIndex(i); }}
-                className={`w-2 h-2 rounded-full transition-all ${i === activeIndex ? 'bg-primary-500 w-4' : 'bg-white/70'}`}
+              <button key={i} onClick={(e) => { e.stopPropagation(); setActiveIndex(i); }} aria-label={`Image ${i + 1}`}
+                className={`h-[2px] transition-all ${i === activeIndex ? 'bg-ink w-8' : 'bg-ink/30 w-5'}`}
               />
             ))}
           </div>
@@ -91,7 +102,7 @@ export default function ProductImageGallery({ images = [] }) {
         <div className="md:hidden flex gap-2 mt-3 overflow-x-auto scrollbar-hide pb-1">
           {images.map((img, i) => (
             <button key={i} onClick={() => setActiveIndex(i)}
-              className={`shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${i === activeIndex ? 'border-primary-500' : 'border-gray-200'}`}>
+              className={`shrink-0 w-16 h-16 overflow-hidden border transition-all ${i === activeIndex ? 'border-ink' : 'border-transparent opacity-60'}`}>
               <img src={img.url} alt="" className="w-full h-full object-cover" />
             </button>
           ))}
@@ -103,21 +114,28 @@ export default function ProductImageGallery({ images = [] }) {
         {lightbox && (
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/90 z-[200] flex items-center justify-center p-4"
+            className="fixed inset-0 bg-ink/95 z-[200] flex items-center justify-center p-4"
             onClick={() => setLightbox(false)}
           >
             <motion.img
-              initial={{ scale: 0.8 }} animate={{ scale: 1 }} exit={{ scale: 0.8 }}
+              initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }}
               src={images[activeIndex]?.url} alt="Saree"
-              className="max-h-[90vh] max-w-full object-contain rounded-xl"
+              className="max-h-[90vh] max-w-full object-contain"
               onClick={(e) => e.stopPropagation()}
             />
-            <button onClick={prev} className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 p-3 rounded-full">
-              <ChevronLeftIcon className="w-6 h-6 text-white" />
+            <button onClick={() => setLightbox(false)} aria-label="Close" className="absolute top-5 right-5 p-3 text-ivory/80 hover:text-ivory">
+              <XMarkIcon className="w-7 h-7" strokeWidth={1.25} />
             </button>
-            <button onClick={next} className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 p-3 rounded-full">
-              <ChevronRightIcon className="w-6 h-6 text-white" />
-            </button>
+            {images.length > 1 && (
+              <>
+                <button onClick={(e) => { e.stopPropagation(); prev(); }} aria-label="Previous image" className="absolute left-4 top-1/2 -translate-y-1/2 p-3 text-ivory/70 hover:text-ivory">
+                  <ChevronLeftIcon className="w-8 h-8" strokeWidth={1.25} />
+                </button>
+                <button onClick={(e) => { e.stopPropagation(); next(); }} aria-label="Next image" className="absolute right-4 top-1/2 -translate-y-1/2 p-3 text-ivory/70 hover:text-ivory">
+                  <ChevronRightIcon className="w-8 h-8" strokeWidth={1.25} />
+                </button>
+              </>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

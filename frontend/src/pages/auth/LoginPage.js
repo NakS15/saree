@@ -60,12 +60,10 @@ export default function LoginPage() {
         className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-8 md:p-10">
 
         <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center gap-2 mb-4">
-            <span className="text-3xl">🪡</span>
-            <span className="font-serif text-2xl font-bold text-primary-600">Saree</span>
-            <span className="font-serif text-2xl font-bold text-gold-600">Bazaar</span>
+          <Link to="/" className="inline-block mb-6 font-serif text-2xl font-medium uppercase tracking-[0.3em] text-ink">
+            Saree<span className="text-gold-600">Bazaar</span>
           </Link>
-          <h1 className="font-serif text-2xl font-bold text-gray-900">Welcome back</h1>
+          <h1 className="font-serif text-3xl font-medium text-ink">Welcome back</h1>
           <p className="text-gray-500 text-sm mt-1">Sign in to your account</p>
         </div>
 

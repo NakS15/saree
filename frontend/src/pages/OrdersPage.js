@@ -31,7 +31,7 @@ export default function OrdersPage() {
           className="bg-green-50 border border-green-200 rounded-2xl p-5 mb-8 flex items-center gap-4">
           <CheckCircleIcon className="w-12 h-12 text-green-500 shrink-0" />
           <div>
-            <h3 className="font-bold text-green-800 text-lg">Order Placed Successfully! 🎉</h3>
+            <h3 className="font-bold text-green-800 text-lg">Order placed successfully</h3>
             <p className="text-green-700 text-sm">Thank you for shopping at SareeBazaar. You'll receive a confirmation email shortly.</p>
           </div>
         </motion.div>

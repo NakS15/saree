@@ -43,18 +43,16 @@ export default function RegisterPage() {
         className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-8 md:p-10">
 
         <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center gap-2 mb-4">
-            <span className="text-3xl">🪡</span>
-            <span className="font-serif text-2xl font-bold text-primary-600">Saree</span>
-            <span className="font-serif text-2xl font-bold text-gold-600">Bazaar</span>
+          <Link to="/" className="inline-block mb-6 font-serif text-2xl font-medium uppercase tracking-[0.3em] text-ink">
+            Saree<span className="text-gold-600">Bazaar</span>
           </Link>
-          <h1 className="font-serif text-2xl font-bold text-gray-900">Create your account</h1>
-          <p className="text-gray-500 text-sm mt-1">Join thousands of saree lovers</p>
+          <h1 className="font-serif text-3xl font-medium text-ink">Create your account</h1>
+          <p className="text-gray-500 text-sm mt-1">Join a curated community of saree connoisseurs</p>
         </div>
 
         {/* Role selector */}
         <div className="flex bg-gray-100 rounded-xl p-1 mb-6">
-          {[['customer','🛍️ Shopper'],['vendor','🏪 Seller']].map(([r, label]) => (
+          {[['customer','Shopper'],['vendor','Seller']].map(([r, label]) => (
             <label key={r} className={`flex-1 py-2 rounded-lg text-sm font-semibold text-center cursor-pointer transition-all ${role === r ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500'}`}>
               <input type="radio" value={r} {...register('role')} className="hidden" />
               {label}
@@ -64,7 +62,7 @@ export default function RegisterPage() {
 
         {role === 'vendor' && (
           <div className="bg-gold-50 border border-gold-200 rounded-xl p-3.5 mb-5 text-sm text-gold-800">
-            🎉 <strong>Sell on SareeBazaar!</strong> After registration, you'll need to complete KYC to start listing products.
+            <strong>Sell on SareeBazaar.</strong> After registration, you'll need to complete KYC to start listing products.
           </div>
         )}
 

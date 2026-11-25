@@ -1,34 +1,61 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay, Pagination, Navigation, EffectFade } from 'swiper/modules';
+import { Autoplay, Pagination, EffectFade } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/pagination';
-import 'swiper/css/navigation';
 import 'swiper/css/effect-fade';
 import { motion } from 'framer-motion';
-import { ArrowRightIcon } from '@heroicons/react/24/outline';
 import ProductCard from '../components/product/ProductCard';
 import { ProductCardSkeleton } from '../components/ui/Skeletons';
-import { productService, categoryService } from '../services';
+import { productService } from '../services';
 
 const HERO_SLIDES = [
-  { title: 'Discover Timeless Elegance', subtitle: 'Authentic Banarasi & Kanjivaram Sarees', cta: 'Shop Bridal Collection', link: '/category/bridal-sarees', bg: 'from-primary-900 via-primary-700 to-amber-800', emoji: '🥻' },
-  { title: 'Handloom Heritage', subtitle: 'Direct from India\'s Master Weavers', cta: 'Explore Handloom', link: '/category/handloom-sarees', bg: 'from-amber-800 via-amber-700 to-teal-800', emoji: '🪡' },
-  { title: 'Summer Cotton Collection', subtitle: 'Lightweight & Breathable Everyday Sarees', cta: 'Shop Cotton Sarees', link: '/category/cotton-sarees', bg: 'from-teal-800 via-primary-700 to-primary-900', emoji: '🌸' },
+  { eyebrow: 'The Bridal Edit', title: 'Heirloom weaves,', accent: 'made to be inherited.', subtitle: 'Banarasi and Kanjivaram sarees from master weavers, made for the moments that matter most.', cta: 'Discover Bridal', link: '/category/bridal-sarees', glow: '#5b1a22' },
+  { eyebrow: 'Handloom Heritage', title: 'The hand behind', accent: 'every thread.', subtitle: 'Distinguished handloom pieces, sourced directly from India\'s master weavers.', cta: 'Explore Handloom', link: '/category/handloom-sarees', glow: '#143c37' },
+  { eyebrow: 'Designer Ateliers', title: 'Contemporary', accent: 'couture drapes.', subtitle: 'Limited-edition pieces from independent designers, presented in considered collections.', cta: 'View Designer Sarees', link: '/category/designer-sarees', glow: '#232a4d' },
 ];
 
 const CATEGORY_CARDS = [
-  { name: 'Silk Sarees',     slug: 'silk-sarees',     emoji: '✨', bg: 'from-yellow-50 to-amber-100',  border: 'border-amber-200' },
-  { name: 'Cotton Sarees',   slug: 'cotton-sarees',   emoji: '🌿', bg: 'from-green-50 to-emerald-100', border: 'border-emerald-200' },
-  { name: 'Bridal Sarees',   slug: 'bridal-sarees',   emoji: '👰', bg: 'from-pink-50 to-rose-100',     border: 'border-rose-200' },
-  { name: 'Designer Sarees', slug: 'designer-sarees', emoji: '💎', bg: 'from-purple-50 to-violet-100', border: 'border-violet-200' },
-  { name: 'Georgette',       slug: 'georgette-sarees',emoji: '🌺', bg: 'from-orange-50 to-red-100',    border: 'border-red-200' },
-  { name: 'Kanjivaram',      slug: 'kanjivaram-sarees',emoji:'🏛️',bg: 'from-indigo-50 to-blue-100',   border: 'border-blue-200' },
+  { name: 'Silk',       slug: 'silk-sarees' },
+  { name: 'Cotton',     slug: 'cotton-sarees' },
+  { name: 'Bridal',     slug: 'bridal-sarees' },
+  { name: 'Designer',   slug: 'designer-sarees' },
+  { name: 'Georgette',  slug: 'georgette-sarees' },
+  { name: 'Kanjivaram', slug: 'kanjivaram-sarees' },
 ];
 
-const stagger = { hidden: {}, visible: { transition: { staggerChildren: 0.1 } } };
-const fadeUp  = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } };
+const TRUST = [
+  { title: 'Complimentary Shipping', desc: 'On orders above ₹999' },
+  { title: 'Considered Returns',     desc: '7-day return policy' },
+  { title: 'Secure Checkout',        desc: 'Razorpay & UPI' },
+  { title: 'Curated Ateliers',       desc: 'KYC verified vendors' },
+];
+
+const stagger = { hidden: {}, visible: { transition: { staggerChildren: 0.08 } } };
+const fadeUp  = { hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6 } } };
+
+// Concentric-circle and rotated-square motif inspired by jaali lattice work.
+function Motif({ className = '' }) {
+  return (
+    <svg viewBox="0 0 400 400" fill="none" stroke="currentColor" strokeWidth="0.6" className={className} aria-hidden="true">
+      {[190, 150, 110, 70, 30].map((r) => <circle key={r} cx="200" cy="200" r={r} />)}
+      <rect x="70" y="70" width="260" height="260" />
+      <rect x="70" y="70" width="260" height="260" transform="rotate(45 200 200)" />
+      {[0, 45, 90, 135].map((a) => <line key={a} x1="200" y1="10" x2="200" y2="390" transform={`rotate(${a} 200 200)`} />)}
+    </svg>
+  );
+}
+
+function SectionHeader({ eyebrow, title }) {
+  return (
+    <div className="text-center mb-12 md:mb-16">
+      <p className="eyebrow mb-4">{eyebrow}</p>
+      <h2 className="section-title">{title}</h2>
+      <span className="block h-px w-12 bg-gold-500 mx-auto mt-6" />
+    </div>
+  );
+}
 
 export default function HomePage() {
   const [featured,  setFeatured]  = useState([]);
@@ -43,36 +70,37 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="min-h-screen">
-      {/* Hero Slider */}
+    <div className="min-h-screen -mb-16">
+      {/* Hero */}
       <section className="relative">
-        <Swiper modules={[Autoplay, Pagination, Navigation, EffectFade]} effect="fade"
+        <Swiper modules={[Autoplay, Pagination, EffectFade]} effect="fade"
           fadeEffect={{ crossFade: true }}
-          autoplay={{ delay: 5000, disableOnInteraction: false }}
-          pagination={{ clickable: true }} navigation loop className="h-[60vh] md:h-[75vh]">
+          autoplay={{ delay: 6500, disableOnInteraction: false }}
+          pagination={{ clickable: true }} loop className="hero-swiper h-[78vh] min-h-[560px]">
           {HERO_SLIDES.map((slide, i) => (
             <SwiperSlide key={i}>
-              <div className={`h-full bg-gradient-to-r ${slide.bg} flex items-center relative overflow-hidden`}>
-                {/* Pattern overlay */}
-                <div className="absolute inset-0 opacity-10"
-                  style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.4\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")',
-                    backgroundSize: '60px' }} />
-                <div className="page-container flex items-center justify-between w-full">
-                  <motion.div initial={{ opacity: 0, x: -40 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.8 }}
-                    className="max-w-xl">
-                    <p className="text-gold-200 text-sm font-semibold uppercase tracking-widest mb-3">SareeBazaar Exclusive</p>
-                    <h1 className="font-serif text-4xl md:text-6xl font-bold text-white leading-tight mb-4">{slide.title}</h1>
-                    <p className="text-white/80 text-lg md:text-xl mb-8">{slide.subtitle}</p>
-                    <div className="flex gap-4">
-                      <Link to={slide.link} className="btn-gold text-base px-8 py-4 inline-flex items-center gap-2">
-                        {slide.cta} <ArrowRightIcon className="w-5 h-5" />
+              <div className="h-full relative overflow-hidden woven flex items-center"
+                style={{ backgroundColor: '#14100e', backgroundImage: `radial-gradient(ellipse 70% 85% at 78% 45%, ${slide.glow} 0%, transparent 70%)` }}>
+                <div className="absolute inset-4 md:inset-8 border border-gold-300/25 pointer-events-none" />
+                <Motif className="hidden md:block absolute -right-40 top-1/2 -translate-y-1/2 w-[600px] text-gold-300 opacity-[0.16]" />
+                <div className="page-container relative z-10 w-full">
+                  <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1 }}
+                    className="max-w-2xl pl-3 md:pl-8">
+                    <p className="eyebrow !text-gold-300 mb-6">{slide.eyebrow}</p>
+                    <h1 className="font-serif font-light text-5xl md:text-7xl !text-ivory leading-[1.04] mb-6">
+                      {slide.title}
+                      <span className="block italic !text-gold-300">{slide.accent}</span>
+                    </h1>
+                    <p className="text-ivory/70 text-base md:text-lg font-light max-w-md leading-relaxed mb-10">{slide.subtitle}</p>
+                    <div className="flex flex-wrap items-center gap-x-8 gap-y-5">
+                      <Link to={slide.link} className="bg-ivory text-ink hover:bg-gold-300 transition-colors duration-300 text-xs font-medium uppercase tracking-[0.2em] px-8 py-4">
+                        {slide.cta}
                       </Link>
-                      <Link to="/products" className="border-2 border-white/60 text-white px-8 py-4 rounded-lg font-semibold hover:bg-white/10 transition-colors">
-                        Browse All
+                      <Link to="/products" className="link-underline !text-ivory !border-ivory/40 hover:!border-ivory">
+                        View All Collections
                       </Link>
                     </div>
                   </motion.div>
-                  <div className="hidden lg:block text-[160px] opacity-20 select-none animate-pulse">{slide.emoji}</div>
                 </div>
               </div>
             </SwiperSlide>
@@ -80,22 +108,14 @@ export default function HomePage() {
         </Swiper>
       </section>
 
-      {/* Trust Badges */}
-      <section className="bg-ethnic-cream border-y border-amber-100">
-        <div className="page-container py-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-            {[
-              { icon: '🚚', title: 'Free Shipping', desc: 'On orders above ₹999' },
-              { icon: '↩️', title: 'Easy Returns',  desc: '7-day return policy' },
-              { icon: '🔒', title: 'Secure Payment',desc: 'Razorpay & UPI' },
-              { icon: '✅', title: 'Verified Sellers',desc: 'KYC verified vendors' },
-            ].map((b) => (
-              <div key={b.title} className="flex items-center gap-3 justify-center py-2">
-                <span className="text-2xl">{b.icon}</span>
-                <div className="text-left">
-                  <p className="font-semibold text-gray-800 text-sm">{b.title}</p>
-                  <p className="text-gray-500 text-xs">{b.desc}</p>
-                </div>
+      {/* Assurances */}
+      <section className="border-b border-gray-200">
+        <div className="page-container">
+          <div className="grid grid-cols-2 md:grid-cols-4 md:divide-x divide-gray-200">
+            {TRUST.map((b) => (
+              <div key={b.title} className="text-center py-7 px-4">
+                <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-ink">{b.title}</p>
+                <p className="text-xs text-gray-500 mt-1.5">{b.desc}</p>
               </div>
             ))}
           </div>
@@ -103,104 +123,95 @@ export default function HomePage() {
       </section>
 
       {/* Categories */}
-      <section className="page-container py-12">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <p className="text-primary-500 text-sm font-semibold uppercase tracking-wider mb-1">Explore</p>
-            <h2 className="section-title">Shop by Category</h2>
-          </div>
-          <Link to="/products" className="text-primary-600 hover:text-primary-700 font-semibold text-sm flex items-center gap-1">
-            View All <ArrowRightIcon className="w-4 h-4" />
-          </Link>
-        </div>
+      <section className="page-container py-20 md:py-28">
+        <SectionHeader eyebrow="The Collections" title="Shop by Weave" />
         <motion.div variants={stagger} initial="hidden" whileInView="visible" viewport={{ once: true }}
-          className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-          {CATEGORY_CARDS.map((cat) => (
+          className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
+          {CATEGORY_CARDS.map((cat, i) => (
             <motion.div key={cat.slug} variants={fadeUp}>
               <Link to={`/category/${cat.slug}`}
-                className={`flex flex-col items-center justify-center p-5 rounded-2xl bg-gradient-to-br ${cat.bg} border ${cat.border} hover:shadow-lg hover:-translate-y-1 transition-all duration-300 text-center group`}>
-                <span className="text-4xl mb-3 group-hover:scale-110 transition-transform duration-300">{cat.emoji}</span>
-                <span className="font-semibold text-gray-800 text-sm leading-tight">{cat.name}</span>
+                className="group relative flex flex-col justify-between aspect-[4/5] lg:aspect-[3/4] p-5 md:p-6 bg-ethnic-silk hover:bg-ink overflow-hidden transition-colors duration-500">
+                <span className="text-[11px] font-medium tracking-[0.3em] text-gold-600 group-hover:text-gold-300 transition-colors">0{i + 1}</span>
+                <Motif className="absolute -right-12 -bottom-12 w-52 text-gold-600/25 group-hover:text-gold-300/30 transition-colors duration-500" />
+                <div className="relative">
+                  <h3 className="font-serif text-2xl md:text-[1.75rem] leading-tight group-hover:!text-ivory transition-colors duration-500">{cat.name}</h3>
+                  <span className="block h-px w-8 bg-gold-500 mt-4 group-hover:w-16 transition-all duration-500" />
+                  <span className="block mt-3 text-[10px] font-medium uppercase tracking-[0.24em] text-gray-500 group-hover:text-ivory/70 transition-colors">Explore</span>
+                </div>
               </Link>
             </motion.div>
           ))}
         </motion.div>
       </section>
 
-      {/* Featured Sarees */}
-      <section className="bg-ethnic-cream py-12">
+      {/* Featured */}
+      <section className="bg-ethnic-cream py-20 md:py-28">
         <div className="page-container">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <p className="text-gold-600 text-sm font-semibold uppercase tracking-wider mb-1">Handpicked</p>
-              <h2 className="section-title">Featured Sarees</h2>
-            </div>
-            <Link to="/products?isFeatured=true" className="text-primary-600 hover:text-primary-700 font-semibold text-sm flex items-center gap-1">
-              See All <ArrowRightIcon className="w-4 h-4" />
-            </Link>
-          </div>
+          <SectionHeader eyebrow="Handpicked" title="Featured Pieces" />
           {loading ? (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-x-5 md:gap-x-8 gap-y-12">
               {Array.from({ length: 8 }).map((_, i) => <ProductCardSkeleton key={i} />)}
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-5 md:gap-x-8 gap-y-12">
               {featured.slice(0, 8).map((p) => <ProductCard key={p._id} product={p} />)}
             </div>
           )}
+          <div className="text-center mt-16">
+            <Link to="/products?isFeatured=true" className="link-underline">View All Featured</Link>
+          </div>
         </div>
       </section>
 
-      {/* Promo Banner */}
-      <section className="page-container py-12">
-        <div className="bg-saree-gradient rounded-3xl overflow-hidden relative">
-          <div className="absolute inset-0 opacity-10"
-            style={{ backgroundImage: 'radial-gradient(circle at 25% 50%, white 1px, transparent 1px)', backgroundSize: '30px 30px' }} />
-          <div className="relative px-8 py-12 md:py-16 text-center">
-            <p className="text-gold-200 text-sm uppercase tracking-widest font-semibold mb-2">Limited Time Offer</p>
-            <h2 className="font-serif text-3xl md:text-5xl font-bold text-white mb-4">Up to 50% Off</h2>
-            <p className="text-white/80 text-lg mb-8 max-w-md mx-auto">On select bridal and designer sarees. Use code <span className="font-bold text-gold-300 bg-white/10 px-2 py-0.5 rounded">BRIDE50</span></p>
-            <Link to="/products" className="btn-gold inline-flex items-center gap-2 text-base px-10 py-4">
-              Shop the Sale <ArrowRightIcon className="w-5 h-5" />
-            </Link>
-          </div>
+      {/* Philosophy */}
+      <section className="relative bg-ink woven overflow-hidden">
+        <Motif className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[720px] text-gold-300 opacity-[0.12]" />
+        <div className="relative page-container py-24 md:py-36 text-center">
+          <p className="eyebrow !text-gold-300 mb-6">Our Philosophy</p>
+          <h2 className="font-serif font-light text-4xl md:text-6xl !text-ivory leading-[1.1] max-w-3xl mx-auto">
+            Every piece carries the <span className="italic !text-gold-300">signature</span> of its maker.
+          </h2>
+          <p className="text-ivory/60 font-light text-base md:text-lg max-w-xl mx-auto mt-8 leading-relaxed">
+            We bring together master weavers and independent designers whose work is made slowly, in small numbers, and meant to last.
+          </p>
+          <Link to="/products" className="inline-block mt-12 border border-ivory/40 hover:border-ivory hover:bg-ivory hover:text-ink text-ivory transition-colors duration-300 text-xs font-medium uppercase tracking-[0.2em] px-9 py-4">
+            Explore the Collection
+          </Link>
         </div>
       </section>
 
       {/* Trending */}
-      <section className="page-container py-12">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <p className="text-orange-500 text-sm font-semibold uppercase tracking-wider mb-1">🔥 What's Hot</p>
-            <h2 className="section-title">Trending Now</h2>
-          </div>
-          <Link to="/products?isTrending=true" className="text-primary-600 hover:text-primary-700 font-semibold text-sm flex items-center gap-1">
-            See All <ArrowRightIcon className="w-4 h-4" />
-          </Link>
-        </div>
+      <section className="page-container py-20 md:py-28">
+        <SectionHeader eyebrow="Currently in Demand" title="Most Coveted" />
         {loading ? (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-x-5 md:gap-x-8 gap-y-12">
             {Array.from({ length: 4 }).map((_, i) => <ProductCardSkeleton key={i} />)}
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-5 md:gap-x-8 gap-y-12">
             {trending.slice(0, 8).map((p) => <ProductCard key={p._id} product={p} />)}
           </div>
         )}
+        <div className="text-center mt-16">
+          <Link to="/products?isTrending=true" className="link-underline">View All Trending</Link>
+        </div>
       </section>
 
       {/* Vendor CTA */}
-      <section className="bg-gray-900 py-16">
-        <div className="page-container text-center">
-          <h2 className="font-serif text-3xl md:text-4xl font-bold text-white mb-4">Sell Your Sarees on SareeBazaar</h2>
-          <p className="text-gray-400 text-lg mb-8 max-w-2xl mx-auto">Join 500+ verified vendors. Reach millions of saree lovers across India. Start earning today.</p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/register?role=vendor" className="btn-gold text-base px-10 py-4 inline-flex items-center gap-2">
-              Start Selling <ArrowRightIcon className="w-5 h-5" />
-            </Link>
-            <Link to="/seller-guidelines" className="border-2 border-gray-600 text-gray-300 px-10 py-4 rounded-lg font-semibold hover:border-gray-400 transition-colors">
-              Learn More
-            </Link>
+      <section className="bg-ethnic-silk">
+        <div className="page-container py-20 md:py-24 grid md:grid-cols-2 gap-10 md:gap-20 items-center">
+          <div>
+            <p className="eyebrow mb-5">For Designers &amp; Weavers</p>
+            <h2 className="section-title">Present your atelier to a discerning clientele.</h2>
+          </div>
+          <div>
+            <p className="text-gray-600 text-base md:text-lg font-light leading-relaxed max-w-md">
+              Apply to join a curated marketplace of independent designers and master weavers.
+            </p>
+            <div className="flex flex-wrap items-center gap-x-8 gap-y-5 mt-8">
+              <Link to="/register?role=vendor" className="btn-primary">Apply to Sell</Link>
+              <Link to="/seller-guidelines" className="link-underline">Seller Guidelines</Link>
+            </div>
           </div>
         </div>
       </section>

@@ -33,18 +33,19 @@ const footerLinks = {
 
 export default function Footer() {
   return (
-    <footer className="bg-gray-900 text-gray-300 mt-16">
+    <footer className="bg-ink text-ivory/60 mt-16">
       {/* Newsletter */}
-      <div className="bg-primary-600">
-        <div className="page-container py-10">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div>
-              <h3 className="font-serif text-2xl font-bold text-white">Stay Updated</h3>
-              <p className="text-primary-100 mt-1">Get exclusive saree collections and offers delivered to your inbox.</p>
+      <div className="border-b border-ivory/10">
+        <div className="page-container py-16 md:py-20">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-10">
+            <div className="text-center md:text-left">
+              <p className="eyebrow !text-gold-300 mb-4">The Journal</p>
+              <h3 className="font-serif font-light text-3xl md:text-4xl !text-ivory">First access to new collections.</h3>
+              <p className="text-ivory/50 font-light mt-3">Designer releases and weaver stories, delivered occasionally.</p>
             </div>
-            <form className="flex gap-3 w-full md:w-auto" onSubmit={(e) => e.preventDefault()}>
-              <input type="email" placeholder="Enter your email" className="input-field flex-1 md:w-72 bg-white" />
-              <button type="submit" className="bg-gold-500 hover:bg-gold-600 text-white font-semibold px-6 py-3 rounded-lg whitespace-nowrap transition-colors">
+            <form className="flex w-full md:w-auto border-b border-ivory/30 focus-within:border-gold-300 transition-colors" onSubmit={(e) => e.preventDefault()}>
+              <input type="email" placeholder="Your email address" className="flex-1 md:w-80 bg-transparent text-ivory placeholder-ivory/40 text-sm py-4 outline-none" />
+              <button type="submit" className="text-[11px] font-medium uppercase tracking-[0.22em] text-gold-300 hover:text-ivory pl-6 whitespace-nowrap transition-colors">
                 Subscribe
               </button>
             </form>
@@ -53,25 +54,23 @@ export default function Footer() {
       </div>
 
       {/* Links */}
-      <div className="page-container py-12">
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8">
+      <div className="page-container py-16">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-10">
           {/* Brand */}
-          <div className="col-span-2 md:col-span-1">
-            <Link to="/" className="flex items-center gap-2 mb-4">
-              <span className="text-2xl">🪡</span>
-              <div>
-                <span className="font-serif text-xl font-bold text-white">Saree</span>
-                <span className="font-serif text-xl font-bold text-gold-400">Bazaar</span>
-              </div>
+          <div className="col-span-2 md:col-span-4 lg:col-span-1">
+            <Link to="/" className="block mb-5">
+              <span className="font-serif text-2xl font-medium uppercase tracking-[0.3em] text-ivory">
+                Saree<span className="text-gold-300">Bazaar</span>
+              </span>
             </Link>
-            <p className="text-sm text-gray-400 leading-relaxed">
-              India's premier destination for authentic sarees from verified weavers and artisans across the country.
+            <p className="text-sm font-light leading-relaxed max-w-xs">
+              A curated home for authentic sarees from verified weavers, artisans and independent designers across India.
             </p>
-            <div className="flex gap-3 mt-5">
-              {['facebook', 'instagram', 'twitter', 'youtube'].map((s) => (
-                <a key={s} href={`https://${s}.com`} target="_blank" rel="noreferrer"
-                  className="w-9 h-9 rounded-full bg-gray-800 hover:bg-primary-600 flex items-center justify-center transition-colors">
-                  <span className="text-xs uppercase font-bold text-gray-300">{s[0].toUpperCase()}</span>
+            <div className="flex gap-6 mt-6">
+              {['Instagram', 'Facebook', 'Pinterest', 'YouTube'].map((s) => (
+                <a key={s} href={`https://${s.toLowerCase()}.com`} target="_blank" rel="noreferrer"
+                  className="text-[10px] font-medium uppercase tracking-[0.2em] text-ivory/50 hover:text-gold-300 transition-colors">
+                  {s}
                 </a>
               ))}
             </div>
@@ -79,11 +78,11 @@ export default function Footer() {
 
           {Object.entries(footerLinks).map(([heading, links]) => (
             <div key={heading}>
-              <h4 className="text-white font-semibold text-sm uppercase tracking-wider mb-4">{heading}</h4>
-              <ul className="space-y-2.5">
+              <h4 className="font-sans text-[11px] font-medium uppercase tracking-[0.26em] text-ivory mb-6">{heading}</h4>
+              <ul className="space-y-3.5">
                 {links.map((link) => (
                   <li key={link.label}>
-                    <Link to={link.to} className="text-sm text-gray-400 hover:text-gold-400 transition-colors">{link.label}</Link>
+                    <Link to={link.to} className="text-sm font-light text-ivory/55 hover:text-gold-300 transition-colors">{link.label}</Link>
                   </li>
                 ))}
               </ul>
@@ -93,19 +92,11 @@ export default function Footer() {
       </div>
 
       {/* Bottom bar */}
-      <div className="border-t border-gray-800">
-        <div className="page-container py-5 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-500">
-          <p>© {new Date().getFullYear()} SareeBazaar. All rights reserved.</p>
-          <div className="flex items-center gap-4">
-            <span>🔒 Secure Payments</span>
-            <span>🚚 Pan India Delivery</span>
-            <span>↩️ Easy Returns</span>
-          </div>
-          <div className="flex items-center gap-2">
-            {['visa', 'mastercard', 'upi', 'razorpay'].map((p) => (
-              <span key={p} className="bg-gray-800 text-xs text-gray-400 px-2 py-1 rounded font-medium uppercase">{p}</span>
-            ))}
-          </div>
+      <div className="border-t border-ivory/10">
+        <div className="page-container py-6 flex flex-col md:flex-row items-center justify-between gap-4 text-[11px] uppercase tracking-[0.18em] text-ivory/40">
+          <p>&copy; {new Date().getFullYear()} SareeBazaar</p>
+          <p>Secure payments &middot; Pan-India delivery &middot; Considered returns</p>
+          <p>Visa &middot; Mastercard &middot; UPI &middot; Razorpay</p>
         </div>
       </div>
     </footer>

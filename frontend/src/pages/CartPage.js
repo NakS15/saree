@@ -28,11 +28,11 @@ export default function CartPage() {
   };
 
   if (items.length === 0) return (
-    <div className="page-container py-20 text-center">
-      <p className="text-7xl mb-6">🛒</p>
-      <h2 className="font-serif text-3xl font-bold text-gray-800 mb-3">Your cart is empty</h2>
-      <p className="text-gray-500 mb-8">Explore our beautiful collection of sarees and add them to your cart</p>
-      <Link to="/products" className="btn-primary text-base px-10 py-4 inline-block">Browse Sarees</Link>
+    <div className="page-container py-24 text-center">
+      <p className="eyebrow mb-4">Shopping Cart</p>
+      <h2 className="font-serif font-light text-4xl md:text-5xl text-ink mb-4">Your cart is empty</h2>
+      <p className="text-gray-500 font-light mb-10">Explore the collections and add pieces you love.</p>
+      <Link to="/products" className="btn-primary inline-block">Browse Collections</Link>
     </div>
   );
 

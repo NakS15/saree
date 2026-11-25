@@ -10,7 +10,7 @@ export const fetchWishlist = createAsyncThunk('wishlist/fetch', async () => {
 export const toggleWishlist = createAsyncThunk('wishlist/toggle', async (productId, { rejectWithValue }) => {
   try {
     const res = await api.post('/wishlist/toggle', { productId });
-    if (res.data.added) toast.success('Added to wishlist ❤️');
+    if (res.data.added) toast.success('Added to wishlist');
     else toast.info('Removed from wishlist');
     return { productId, added: res.data.added };
   } catch (err) {

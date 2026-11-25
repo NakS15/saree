@@ -2,18 +2,13 @@ import React from 'react';
 
 export default function LoadingScreen() {
   return (
-    <div className="fixed inset-0 bg-white flex flex-col items-center justify-center z-[999]">
+    <div className="fixed inset-0 bg-ivory flex flex-col items-center justify-center z-[999]">
       <div className="text-center">
-        <div className="text-5xl mb-4 animate-pulse">🪡</div>
-        <h1 className="font-serif text-2xl font-bold">
-          <span className="text-primary-600">Saree</span>
-          <span className="text-gold-600">Bazaar</span>
+        <h1 className="font-serif text-3xl font-medium uppercase tracking-[0.32em] pl-[0.32em]">
+          Saree<span className="text-gold-600">Bazaar</span>
         </h1>
-        <div className="flex justify-center gap-1.5 mt-5">
-          {[0,1,2].map((i) => (
-            <div key={i} className="w-2.5 h-2.5 bg-primary-500 rounded-full animate-bounce"
-              style={{ animationDelay: `${i * 0.15}s` }} />
-          ))}
+        <div className="mx-auto mt-6 h-px w-24 bg-gray-200 overflow-hidden">
+          <div className="h-full w-1/2 bg-gold-500 animate-pulse" />
         </div>
       </div>
     </div>

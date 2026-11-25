@@ -90,10 +90,9 @@ export default function ProductsPage() {
           {loading ? (
             <ProductGridSkeleton count={12} />
           ) : products.length === 0 ? (
-            <div className="text-center py-20">
-              <p className="text-6xl mb-4">🥻</p>
-              <h3 className="font-serif text-2xl font-semibold text-gray-700 mb-2">No sarees found</h3>
-              <p className="text-gray-400">Try adjusting your filters or search terms</p>
+            <div className="text-center py-24">
+              <h3 className="font-serif font-light text-4xl text-ink mb-3">No pieces found</h3>
+              <p className="text-gray-500 font-light">Try adjusting your filters or search terms.</p>
             </div>
           ) : (
             <div className={gridView

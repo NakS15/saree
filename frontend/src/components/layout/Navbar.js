@@ -33,54 +33,56 @@ export default function Navbar() {
   const handleLogout = () => { dispatch(logout()); navigate('/'); };
 
   return (
-    <header className={`sticky top-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white shadow-lg' : 'bg-white border-b border-gray-100'}`}>
+    <header className={`sticky top-0 z-50 bg-ivory/95 backdrop-blur transition-shadow duration-300 ${scrolled ? 'shadow-lg' : ''} border-b border-gray-200`}>
       {/* Top bar */}
-      <div className="bg-primary-500 text-white text-center py-1.5 text-xs font-medium tracking-wide">
-        🎉 Free shipping on orders above ₹999 | Use code FIRST10 for 10% off your first order
+      <div className={`bg-ink text-ivory/80 text-center text-[10px] font-medium uppercase tracking-[0.3em] overflow-hidden transition-all duration-300 ${scrolled ? 'max-h-0 py-0' : 'max-h-12 py-2.5'}`}>
+        Complimentary shipping on orders above ₹999
       </div>
 
       {/* Main nav */}
       <div className="page-container">
-        <div className="flex items-center justify-between h-16 gap-4">
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 shrink-0">
-            <span className="text-2xl">🪡</span>
-            <div>
-              <span className="font-serif text-xl font-bold text-primary-600">Saree</span>
-              <span className="font-serif text-xl font-bold text-gold-600">Bazaar</span>
-            </div>
-          </Link>
-
-          {/* Search bar - desktop */}
-          <div className="hidden md:flex flex-1 max-w-2xl">
+        <div className={`grid grid-cols-3 items-center h-16 transition-all duration-300 ${scrolled ? 'md:h-16' : 'md:h-24'}`}>
+          {/* Search - desktop */}
+          <div className="hidden md:flex">
             <button
               onClick={() => dispatch(toggleSearchOverlay())}
-              className="w-full flex items-center gap-3 bg-gray-100 hover:bg-gray-200 rounded-full px-5 py-2.5 text-gray-500 transition-colors"
+              className="flex items-center gap-3 text-gray-600 hover:text-ink transition-colors"
             >
-              <MagnifyingGlassIcon className="w-5 h-5" />
-              <span className="text-sm">Search sarees, fabrics, occasions...</span>
+              <MagnifyingGlassIcon className="w-5 h-5" strokeWidth={1.25} />
+              <span className="text-[11px] font-medium uppercase tracking-[0.22em]">Search</span>
             </button>
           </div>
+          <div className="md:hidden" />
+
+          {/* Logo */}
+          <Link to="/" className="justify-self-center text-center shrink-0">
+            <span className="block font-serif text-2xl md:text-[2rem] font-medium uppercase tracking-[0.32em] text-ink leading-none pl-[0.32em]">
+              Saree<span className="text-gold-600">Bazaar</span>
+            </span>
+            <span className={`mt-2 text-[9px] font-medium uppercase tracking-[0.42em] text-gray-500 pl-[0.42em] ${scrolled ? 'hidden' : 'hidden md:block'}`}>
+              Heritage Weaves &amp; Couture
+            </span>
+          </Link>
 
           {/* Right icons */}
-          <div className="flex items-center gap-1 md:gap-2">
-            <button onClick={() => dispatch(toggleSearchOverlay())} className="md:hidden p-2 rounded-full hover:bg-gray-100">
-              <MagnifyingGlassIcon className="w-6 h-6 text-gray-700" />
+          <div className="flex items-center justify-self-end gap-1 md:gap-3">
+            <button onClick={() => dispatch(toggleSearchOverlay())} className="md:hidden p-2">
+              <MagnifyingGlassIcon className="w-6 h-6 text-gray-700" strokeWidth={1.25} />
             </button>
 
-            <Link to="/wishlist" className="relative p-2 rounded-full hover:bg-gray-100">
-              <HeartIcon className="w-6 h-6 text-gray-700" />
+            <Link to="/wishlist" className="relative p-2">
+              <HeartIcon className="w-6 h-6 text-gray-700 hover:text-ink transition-colors" strokeWidth={1.25} />
               {wishlistCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-primary-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                <span className="absolute top-0 right-0 bg-ink text-ivory text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-medium">
                   {wishlistCount}
                 </span>
               )}
             </Link>
 
-            <button onClick={() => dispatch(openCartDrawer())} className="relative p-2 rounded-full hover:bg-gray-100">
-              <ShoppingCartIcon className="w-6 h-6 text-gray-700" />
+            <button onClick={() => dispatch(openCartDrawer())} className="relative p-2">
+              <ShoppingCartIcon className="w-6 h-6 text-gray-700 hover:text-ink transition-colors" strokeWidth={1.25} />
               {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-primary-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                <span className="absolute top-0 right-0 bg-ink text-ivory text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-medium">
                   {cartCount > 9 ? '9+' : cartCount}
                 </span>
               )}
@@ -88,13 +90,13 @@ export default function Navbar() {
 
             {/* User menu */}
             <div className="relative" onMouseEnter={() => setActiveDropdown('user')} onMouseLeave={() => setActiveDropdown(null)}>
-              <button className="flex items-center gap-1.5 p-2 rounded-full hover:bg-gray-100">
+              <button className="flex items-center gap-1.5 p-2">
                 {user?.avatar ? (
                   <img src={user.avatar} alt={user.name} className="w-7 h-7 rounded-full object-cover" />
                 ) : (
-                  <UserIcon className="w-6 h-6 text-gray-700" />
+                  <UserIcon className="w-6 h-6 text-gray-700 hover:text-ink transition-colors" strokeWidth={1.25} />
                 )}
-                {user && <span className="hidden lg:block text-sm font-medium text-gray-700 max-w-[80px] truncate">{user.name.split(' ')[0]}</span>}
+                {user && <span className="hidden lg:block text-[11px] font-medium uppercase tracking-[0.18em] text-gray-700 max-w-[90px] truncate">{user.name.split(' ')[0]}</span>}
               </button>
 
               <AnimatePresence>
@@ -141,24 +143,25 @@ export default function Navbar() {
         </div>
 
         {/* Categories bar */}
-        <nav className="hidden md:flex items-center gap-1 pb-2 overflow-x-auto scrollbar-hide">
-          <Link to="/products" className="px-3 py-1.5 text-sm font-medium text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-full whitespace-nowrap transition-colors">
-            All Sarees
+        <nav className="hidden md:block pb-4 overflow-x-auto scrollbar-hide">
+          <div className="flex items-center gap-6 lg:gap-10 w-max mx-auto">
+          <Link to="/products" className="text-[11px] font-medium uppercase tracking-[0.22em] text-gray-700 hover:text-ink whitespace-nowrap transition-colors">
+            All Collections
           </Link>
-          {categories.slice(0, 8).map((cat) => (
+          {categories.slice(0, 6).map((cat) => (
             <div key={cat._id} className="relative group">
               <Link
                 to={`/category/${cat.slug}`}
-                className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-full whitespace-nowrap transition-colors"
+                className="flex items-center gap-1 text-[11px] font-medium uppercase tracking-[0.22em] text-gray-700 hover:text-ink whitespace-nowrap transition-colors"
               >
-                {cat.name}
-                {cat.children?.length > 0 && <ChevronDownIcon className="w-3.5 h-3.5" />}
+                {cat.name.replace(/\s*Sarees$/i, '')}
+                {cat.children?.length > 0 && <ChevronDownIcon className="w-3 h-3" />}
               </Link>
               {cat.children?.length > 0 && (
-                <div className="absolute left-0 top-full pt-2 hidden group-hover:block z-40">
-                  <div className="bg-white rounded-xl shadow-xl border border-gray-100 py-2 min-w-[180px]">
+                <div className="absolute left-1/2 -translate-x-1/2 top-full pt-4 hidden group-hover:block z-40">
+                  <div className="bg-ivory border border-gray-200 shadow-xl py-3 min-w-[200px]">
                     {cat.children.map((sub) => (
-                      <Link key={sub._id} to={`/category/${sub.slug}`} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary-600">
+                      <Link key={sub._id} to={`/category/${sub.slug}`} className="block px-6 py-2 text-xs uppercase tracking-[0.18em] text-gray-700 hover:text-ink hover:bg-ethnic-cream">
                         {sub.name}
                       </Link>
                     ))}
@@ -167,12 +170,13 @@ export default function Navbar() {
               )}
             </div>
           ))}
-          <Link to="/products?isTrending=true" className="px-3 py-1.5 text-sm font-medium text-gold-600 hover:bg-gold-50 rounded-full whitespace-nowrap transition-colors">
-            🔥 Trending
+          <Link to="/products?isTrending=true" className="hidden lg:block text-[11px] font-medium uppercase tracking-[0.22em] text-gold-600 hover:text-gold-700 whitespace-nowrap transition-colors">
+            Trending
           </Link>
-          <Link to="/products?isFeatured=true" className="px-3 py-1.5 text-sm font-medium text-primary-600 hover:bg-primary-50 rounded-full whitespace-nowrap transition-colors">
-            ⭐ Featured
+          <Link to="/products?isFeatured=true" className="hidden lg:block text-[11px] font-medium uppercase tracking-[0.22em] text-primary-600 hover:text-primary-700 whitespace-nowrap transition-colors">
+            Featured
           </Link>
+          </div>
         </nav>
       </div>
 
