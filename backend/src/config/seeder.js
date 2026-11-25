@@ -83,7 +83,7 @@ const importData = async () => {
       name: 'Kanjivaram Pure Silk Saree - Royal Red', slug: 'kanjivaram-pure-silk-saree-royal-red-' + Date.now(),
       description: 'Exquisite handwoven Kanjivaram pure silk saree with traditional temple border. Perfect for weddings and special occasions.',
       price: 18500, compareAtPrice: 24000, stock: 15,
-      images: [{ url: 'https://images.unsplash.com/photo-1610189352649-c0c5e0e9d2e5?w=800', isPrimary: true }],
+      images: [{ url: 'https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=800', isPrimary: true }],
       colors: ['Red', 'Maroon'], isFeatured: true, isTrending: true, status: 'active', rating: 4.8, numReviews: 45,
       attributes: { fabric: 'Silk', workType: 'Zari', occasion: ['Wedding', 'Festival', 'Bridal'], length: 5.5, blousePieceIncluded: true, origin: 'Kanchipuram', careInstructions: 'Dry clean only' },
     },
