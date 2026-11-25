@@ -40,7 +40,8 @@ const importData = async () => {
   logger.info(`${createdCats.length} categories seeded`);
 
   // Insert users
-  const createdUsers = await User.insertMany(users);
+  // create() runs the pre-save hook that hashes passwords; insertMany() would skip it.
+  const createdUsers = await User.create(users);
   logger.info(`${createdUsers.length} users seeded`);
 
   const vendorUser = createdUsers.find((u) => u.role === 'vendor');

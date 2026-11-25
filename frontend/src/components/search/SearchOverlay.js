@@ -11,7 +11,7 @@ import { formatPrice } from '../../utils/helpers';
 export default function SearchOverlay() {
   const dispatch   = useDispatch();
   const navigate   = useNavigate();
-  const { searchOpen } = useSelector((s) => s.ui);
+  const { searchOverlayOpen: searchOpen } = useSelector((s) => s.ui);
   const inputRef   = useRef(null);
 
   const [query,    setQuery]    = useState('');
@@ -29,7 +29,8 @@ export default function SearchOverlay() {
       setLoading(true);
       try {
         const res = await productService.autocomplete(query);
-        setResults(res.data.data);
+        const data = res.data.data;
+        setResults(Array.isArray(data) ? { products: data, categories: [] } : data);
       } catch { setResults({ products: [], categories: [] }); }
       finally { setLoading(false); }
     }, 350);
