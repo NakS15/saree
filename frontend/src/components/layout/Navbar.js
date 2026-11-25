@@ -41,7 +41,7 @@ export default function Navbar() {
 
       {/* Main nav */}
       <div className="page-container">
-        <div className={`grid grid-cols-3 items-center h-16 transition-all duration-300 ${scrolled ? 'md:h-16' : 'md:h-24'}`}>
+        <div className={`grid grid-cols-[1fr_auto_1fr] items-center h-16 transition-all duration-300 ${scrolled ? 'md:h-16' : 'md:h-24'}`}>
           {/* Search - desktop */}
           <div className="hidden md:flex">
             <button
@@ -52,11 +52,18 @@ export default function Navbar() {
               <span className="text-[11px] font-medium uppercase tracking-[0.22em]">Search</span>
             </button>
           </div>
-          <div className="md:hidden" />
+          <div className="md:hidden flex items-center -ml-2">
+            <button className="p-2" aria-label="Menu" onClick={() => dispatch(toggleMobileMenu())}>
+              {mobileMenuOpen ? <XMarkIcon className="w-6 h-6" strokeWidth={1.25} /> : <Bars3Icon className="w-6 h-6" strokeWidth={1.25} />}
+            </button>
+            <button onClick={() => dispatch(toggleSearchOverlay())} aria-label="Search" className="p-2">
+              <MagnifyingGlassIcon className="w-6 h-6 text-gray-700" strokeWidth={1.25} />
+            </button>
+          </div>
 
           {/* Logo */}
           <Link to="/" className="justify-self-center text-center shrink-0">
-            <span className="block font-serif text-2xl md:text-[2rem] font-medium uppercase tracking-[0.32em] text-ink leading-none pl-[0.32em]">
+            <span className="block font-serif text-lg sm:text-2xl md:text-[2rem] font-medium uppercase tracking-[0.2em] sm:tracking-[0.32em] text-ink leading-none pl-[0.2em] sm:pl-[0.32em]">
               Saree<span className="text-gold-600">Bazaar</span>
             </span>
             <span className={`mt-2 text-[9px] font-medium uppercase tracking-[0.42em] text-gray-500 pl-[0.42em] ${scrolled ? 'hidden' : 'hidden md:block'}`}>
@@ -65,12 +72,8 @@ export default function Navbar() {
           </Link>
 
           {/* Right icons */}
-          <div className="flex items-center justify-self-end gap-1 md:gap-3">
-            <button onClick={() => dispatch(toggleSearchOverlay())} className="md:hidden p-2">
-              <MagnifyingGlassIcon className="w-6 h-6 text-gray-700" strokeWidth={1.25} />
-            </button>
-
-            <Link to="/wishlist" className="relative p-2">
+          <div className="flex items-center justify-self-end gap-0 md:gap-3 -mr-2 md:mr-0">
+            <Link to="/wishlist" aria-label="Wishlist" className="relative p-2 hidden md:block">
               <HeartIcon className="w-6 h-6 text-gray-700 hover:text-ink transition-colors" strokeWidth={1.25} />
               {wishlistCount > 0 && (
                 <span className="absolute top-0 right-0 bg-ink text-ivory text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-medium">
@@ -90,7 +93,7 @@ export default function Navbar() {
 
             {/* User menu */}
             <div className="relative" onMouseEnter={() => setActiveDropdown('user')} onMouseLeave={() => setActiveDropdown(null)}>
-              <button className="flex items-center gap-1.5 p-2">
+              <button className="flex items-center gap-1.5 p-2" aria-label="Account" onClick={() => setActiveDropdown((d) => (d === 'user' ? null : 'user'))}>
                 {user?.avatar ? (
                   <img src={user.avatar} alt={user.name} className="w-7 h-7 rounded-full object-cover" />
                 ) : (
@@ -135,10 +138,6 @@ export default function Navbar() {
                 )}
               </AnimatePresence>
             </div>
-
-            <button className="md:hidden p-2" onClick={() => dispatch(toggleMobileMenu())}>
-              {mobileMenuOpen ? <XMarkIcon className="w-6 h-6" /> : <Bars3Icon className="w-6 h-6" />}
-            </button>
           </div>
         </div>
 
@@ -185,17 +184,18 @@ export default function Navbar() {
         {mobileMenuOpen && (
           <motion.div
             initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
-            className="md:hidden border-t border-gray-100 bg-white overflow-hidden"
+            className="md:hidden border-t border-gray-200 bg-ivory overflow-hidden"
           >
             <nav className="page-container py-4 space-y-1">
-              <Link to="/products" className="block px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-gray-50">All Sarees</Link>
+              <Link to="/products" className="block px-3 py-2.5 text-xs font-medium uppercase tracking-[0.2em] hover:bg-ethnic-cream">All Collections</Link>
               {categories.map((cat) => (
-                <Link key={cat._id} to={`/category/${cat.slug}`} className="block px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-gray-50">{cat.name}</Link>
+                <Link key={cat._id} to={`/category/${cat.slug}`} className="block px-3 py-2.5 text-xs font-medium uppercase tracking-[0.2em] hover:bg-ethnic-cream">{cat.name.replace(/\s*Sarees$/i, '')}</Link>
               ))}
+              <Link to="/wishlist" className="block px-3 py-2.5 text-xs font-medium uppercase tracking-[0.2em] hover:bg-ethnic-cream">Wishlist{wishlistCount > 0 ? ` (${wishlistCount})` : ''}</Link>
               {!user && (
-                <div className="pt-4 border-t border-gray-100 flex gap-3">
-                  <Link to="/login" className="btn-primary text-sm py-2 flex-1 text-center">Login</Link>
-                  <Link to="/register" className="btn-secondary text-sm py-2 flex-1 text-center">Register</Link>
+                <div className="pt-4 border-t border-gray-200 flex gap-3">
+                  <Link to="/login" className="btn-primary !px-4 !py-3 flex-1 text-center">Login</Link>
+                  <Link to="/register" className="btn-secondary !px-4 !py-3 flex-1 text-center">Register</Link>
                 </div>
               )}
             </nav>
